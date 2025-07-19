@@ -12,8 +12,8 @@ import numpy as np
 
 # === Configuration ===
 DATA_DIR = 'data/food101_subset'
-NUM_CLASSES = 69
-EPOCHS = 10
+NUM_CLASSES = 80
+EPOCHS = 15
 BATCH_SIZE = 32
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
