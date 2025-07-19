@@ -1,0 +1,42 @@
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment
+.env
+.env.*
+venv/
+ENV/
+env/
+
+# IDEs
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Cache and logs
+*.cache
+.cache/
+*.log
+logs/
+
+# Uploads and user data
+uploads/
+
+# Python notebook checkpoints
+.ipynb_checkpoints/
+
+# Compiled model files
+*.pt
+*.h5
+
+# Ignore train and val datasets but keep structure
+train/*
+val/*
+!train/.gitkeep
+!val/.gitkeep
