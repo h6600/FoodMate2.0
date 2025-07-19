@@ -1,5 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
+<!-- Leaflet Core CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<!-- Leaflet Geocoder CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <div class="layout-container">
   <!-- Sidebar -->
@@ -25,7 +32,11 @@
       <form class="upload-form" method="POST" enctype="multipart/form-data">
         <label>Choose Image:</label>
         <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required>
+        <h4>📍 Select Location (Where you ate this?)</h4>
+        <div id="map" style="height: 300px; border-radius: 10px; margin-bottom: 15px;"></div>
 
+        <input type="hidden" id="latitude" name="latitude">
+        <input type="hidden" id="longitude" name="longitude">
         <label>Write a short review:</label>
         <textarea name="review" placeholder="Describe the food..." oninput="previewReview(event)" required></textarea>
 
@@ -49,15 +60,55 @@
 </div>
 
 <script>
-function previewImage(event) {
-  const output = document.getElementById('preview-img');
-  output.src = URL.createObjectURL(event.target.files[0]);
-}
-function previewReview(event) {
-  const text = document.getElementById('preview-text');
-  text.textContent = event.target.value || "Your review will appear here";
-}
+  function previewImage(event) {
+    const output = document.getElementById('preview-img');
+    output.src = URL.createObjectURL(event.target.files[0]);
+  }
+  function previewReview(event) {
+    const text = document.getElementById('preview-text');
+    text.textContent = event.target.value || "Your review will appear here";
+  }
+</script>
+<!-- Leaflet Core JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Leaflet Geocoder JS -->
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+<script>
+  const map = L.map('map').setView([20.5937, 78.9629], 5);  // Default to India
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  let marker;
+
+  function updateCoordinates(lat, lng) {
+    document.getElementById('latitude').value = lat;
+    document.getElementById('longitude').value = lng;
+
+    if (marker) {
+      marker.setLatLng([lat, lng]);
+    } else {
+      marker = L.marker([lat, lng]).addTo(map);
+    }
+  }
+
+  // Add geocoder search bar
+  const geocoder = L.Control.geocoder({
+    defaultMarkGeocode: false
+  })
+  .on('markgeocode', function(e) {
+    const latlng = e.geocode.center;
+    map.setView(latlng, 15);
+    updateCoordinates(latlng.lat, latlng.lng);
+  })
+  .addTo(map);
+
+  // Click-to-pin
+  map.on('click', function(e) {
+    updateCoordinates(e.latlng.lat, e.latlng.lng);
+  });
 </script>
 
 {% endblock %}
-

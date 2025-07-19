@@ -1,12 +1,14 @@
+from flask import flash
 import os
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
 from database.mongo_handler import users, posts
 from bson.objectid import ObjectId
-from datetime import datetime 
+from datetime import datetime
 from werkzeug.utils import secure_filename
 from base64 import b64encode
+import base64
+import datetime
 from utils.classifier import predict_food_tag
-from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -42,9 +44,6 @@ def register():
             'about': request.form['about'],
             'user_created_on': datetime.utcnow()
         }
-        confirm = request.form['confirm_password']
-        if data['password'] != confirm:
-            return "Passwords do not match", 400
         # Save to MongoDB
         if users.find_one({'username': data['username']}):
             return "Username already exists", 400
@@ -69,31 +68,49 @@ def logout():
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if 'user' not in session:
-        return redirect('/login')
+        return redirect(url_for('login'))
 
     prediction = None
     if request.method == 'POST':
-        image_file = request.files['image']
-        image_base64 = b64encode(image_file.read()).decode('utf-8')
+        # Basic info
+        title = request.form.get('title')
+        review = request.form.get('review')
+        file = request.files['image']
+        user = session['user']
 
-        review = request.form['review']
-        prediction = predict_food_tag(image_base64)
 
-        posts.insert_one({
-            "username": session['user'],
-            "image_base64": image_base64,
+        # Read and encode image
+        if file:
+            image_data = base64.b64encode(file.read()).decode('utf-8')
+        else:
+            image_data = ""
+        prediction = predict_food_tag(image_data)
+        # Location
+        latitude = request.form.get('latitude')
+        longitude = request.form.get('longitude')
+        location = {
+            "latitude": float(latitude) if latitude else None,
+            "longitude": float(longitude) if longitude else None
+        }
+
+        # Save to MongoDB
+        post_data = {
             "review": review,
+            "image_base64": image_data,
+            "username": user,
+            "timestamp": datetime.datetime.now(),
+            "likes": [],
+            "comments": [],
+            "location": location,
             "predicted_tag": prediction
-        })
+        }
 
-    return render_template("upload.html", prediction=prediction)
+        posts.insert_one(post_data)
+        flash('Post uploaded successfully!')
+        return redirect(url_for('feed'))
 
-@app.route('/profile')
-def profile():
-    if 'user' not in session:
-        return redirect('/login')
-    user_posts = list(posts.find({"username": session["user"]}))
-    return render_template("profile.html", user_posts=user_posts)
+    return render_template('upload.html')
+
 
 @app.route('/feed')
 def feed():
@@ -117,23 +134,6 @@ def feed():
         current_page=page,
         total_pages=total_pages
     )
-
-
-@app.route('/upload_profile_pic', methods=['GET', 'POST'])
-def upload_profile_pic():
-    if 'user' not in session:
-        return redirect('/login')
-
-    if request.method == 'POST':
-        image_file = request.files['profile_pic']
-        image_base64 = b64encode(image_file.read()).decode('utf-8')
-        users.update_one(
-            {"username": session["user"]},
-            {"$set": {"profile_pic": image_base64}}
-        )
-        return redirect('/profile')
-
-    return render_template("upload_profile_pic.html")
 
 @app.route('/post/<post_id>')
 def view_post(post_id):
@@ -187,6 +187,43 @@ def comment_post(post_id):
 
     return redirect(url_for('view_post', post_id=post_id))
 
+# --- Profile Page View and Edit ---
+
+@app.route('/profile')
+def profile():
+    if 'user' not in session:
+        return redirect('/login')
+    user_posts = list(posts.find({"username": session["user"]}))
+    user = users.find_one({'username': session['user']})
+    total_likes = sum(len(post.get('likes', [])) for post in user_posts)
+    total_comments = sum(len(post.get('comments', [])) for post in user_posts)
+    return render_template("profile.html", user_posts=user_posts, user=user,post_count=len(user_posts), total_likes=total_likes, total_comments=total_comments)
+
+@app.route('/edit_profile', methods=['POST'])
+def edit_profile():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    updated_data = {
+        'firstname': request.form.get('firstname'),
+        'lastname': request.form.get('lastname'),
+        'email': request.form.get('email'),
+        'about': request.form.get('about')
+    }
+
+    # Handle profile image upload
+    if 'profile_pic' in request.files:
+        file = request.files['profile_pic']
+        if file and file.filename != '':
+            img_data = file.read()
+            img_base64 = base64.b64encode(img_data).decode('utf-8')
+            updated_data['profile_pic'] = img_base64
+
+    # Update in MongoDB
+    users.update_one({'username': session['username']}, {'$set': updated_data})
+
+    flash('Profile updated successfully!')
+    return redirect(url_for('profile'))
 
 
 if __name__ == '__main__':

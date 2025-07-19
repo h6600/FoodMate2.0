@@ -22,17 +22,52 @@
     <!-- Profile Header -->
     <section class="profile-header">
       <div class="profile-avatar">
-        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profile Picture">
+        {% if user.profile_pic %}
+        <img src="data:image/png;base64,{{ user.profile_pic }}" alt="Profile Picture" class="rounded-avatar">
+        {% else %}
+        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Default Avatar" class="rounded-avatar">
+        {% endif %}
       </div>
-      <div class="profile-info">
-        <h2>{{ session['user'] }}</h2>
-        <p class="profile-bio">Food enthusiast exploring flavors 🍜🍕</p>
-        <div class="profile-stats">
-          <div><strong>{{ post_count }}</strong><span>Posts</span></div>
-          <div><strong>{{ like_count }}</strong><span>Likes</span></div>
-          <div><strong>{{ comment_count }}</strong><span>Comments</span></div>
+      <div class="user-details">
+        <h2>{{ user.firstname }} {{ user.lastname }}</h2>
+        <p class="bio">{{ user.about or "Food enthusiast exploring flavors 🍹🍕" }}</p>
+        <div class="stats">
+          <a href="#">📸 {{ post_count }} Posts</a>
+          <a href="#">❤️ {{ total_likes }} Likes</a>
+          <a href="#">💬 {{ total_comments }} Comments</a>
         </div>
       </div>
+      <!-- Trigger Button -->
+      <button class="btn-edit" onclick="document.getElementById('editModal').style.display='block'">
+        ✏️ Edit Profile
+      </button>
+
+      <!-- Modal -->
+      <div id="editModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="document.getElementById('editModal').style.display='none'">&times;</span>
+          <h3>Edit Profile</h3>
+          <form action="{{ url_for('edit_profile') }}" method="POST" enctype="multipart/form-data">
+            <label>First Name</label>
+            <input type="text" name="firstname" value="{{ user.firstname }}" required>
+
+            <label>Last Name</label>
+            <input type="text" name="lastname" value="{{ user.lastname }}" required>
+
+            <label>Email</label>
+            <input type="email" name="email" value="{{ user.email }}" required>
+
+            <label>About</label>
+            <textarea name="about">{{ user.about }}</textarea>
+
+            <label>Profile Picture</label>
+            <input type="file" name="profile_pic" accept="image/*">
+
+            <button type="submit" id="editProfileBtn" class="btn-save">Save Changes</button>
+          </form>
+        </div>
+      </div>
+
     </section>
 
     <!-- User's Posts -->
@@ -56,5 +91,23 @@
     </section>
   </main>
 </div>
+<script>
+  const modal = document.getElementById("editModal");
+  const btn = document.getElementById("editProfileBtn");
+  const span = document.querySelector(".modal .close");
 
+  btn.onclick = function () {
+    modal.style.display = "block";
+  }
+
+  span.onclick = function () {
+    modal.style.display = "none";
+  }
+
+  window.onclick = function (event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+</script>
 {% endblock %}
