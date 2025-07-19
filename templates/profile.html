@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="layout-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <i class="fas fa-utensils"></i>
+      <h1>Foodmate</h1>
+    </div>
+    <ul class="nav-links">
+      <li><a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+      <li><a href="/feed"><i class="fas fa-rss"></i> Feed</a></li>
+      <li class="active"><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
+      <li><a href="/upload"><i class="fas fa-plus"></i> Upload</a></li>
+      <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Profile Area -->
+  <main class="dashboard-main">
+    <!-- Profile Header -->
+    <section class="profile-header">
+      <div class="profile-avatar">
+        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profile Picture">
+      </div>
+      <div class="profile-info">
+        <h2>{{ session['user'] }}</h2>
+        <p class="profile-bio">Food enthusiast exploring flavors 🍜🍕</p>
+        <div class="profile-stats">
+          <div><strong>{{ post_count }}</strong><span>Posts</span></div>
+          <div><strong>{{ like_count }}</strong><span>Likes</span></div>
+          <div><strong>{{ comment_count }}</strong><span>Comments</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- User's Posts -->
+    <section class="recent-posts">
+      <h3>Your Posts</h3>
+      <div class="post-list">
+        {% for post in user_posts %}
+        <div class="post-item">
+          <img src="data:image/jpeg;base64,{{ post.image_base64 }}" alt="Food Image">
+          <div class="post-content">
+            <h4>{{ post.review }}</h4>
+            <p class="tag">🍴 {{ post.predicted_tag }}</p>
+            <p class="meta">
+              <i class="fas fa-heart"></i> {{ post.likes | length if post.likes }} &nbsp;
+              <i class="fas fa-comment"></i> {{ post.comments | length if post.comments }}
+            </p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+</div>
+
+{% endblock %}

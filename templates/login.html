@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Foodmate – Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="login-body">
+
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <i class="fas fa-utensils"></i>
+      <h1>Welcome to Foodmate</h1>
+      <p>Share your reviews & discover food</p>
+    </div>
+    <form method="POST">
+      <input type="text" name="username" placeholder="Enter Username" required>
+      <input type="password" name="password" placeholder="Enter Password" required>
+      <button type="submit">Login</button>
+      <p class="hint">Don't have an account? <a href="/register">Register</a></p>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="post-view-container">
+  <div class="post-card-standalone">
+    <!-- User Header -->
+    <div class="post-header">
+      <div class="avatar-circle">{{ post.username[0] }}</div>
+      <div class="user-info">
+        <strong>{{ post.username }}</strong>
+        <span class="tag-label">#{{ post.predicted_tag }}</span>
+      </div>
+    </div>
+
+    <!-- Post Image -->
+    <div class="post-image-wrap">
+      <img src="data:image/png;base64,{{ post.image_base64 }}" alt="Food Image">
+    </div>
+
+    <!-- Like and Actions -->
+    <div class="post-actions">
+      <form class="like-form" onsubmit="likePost(event)">
+        <input type="hidden" id="post_id" value="{{ post._id }}">
+        <button type="submit" id="like-btn" class="like-btn">
+          {% if session['user'] in post.likes %}
+          ❤️
+          {% else %}
+          🤍
+          {% endif %}
+        </button>
+        <span id="like-count">{{ post.likes | length }}</span> likes
+      </form>
+    </div>
+
+    <!-- Review -->
+    <div class="post-caption">
+      <p><strong>{{ post.username }}</strong> {{ post.review }}</p>
+    </div>
+
+    <!-- Comment Form -->
+    <form method="POST" action="/comment_post/{{ post._id }}" class="comment-form">
+      <textarea name="comment" placeholder="Add a comment..." required></textarea>
+      <button type="submit">Post</button>
+    </form>
+
+    <!-- Comment List -->
+    <div class="comments">
+      {% for comment in post.comments %}
+      <div class="comment-bubble">
+        <strong>{{ comment.username }}</strong> {{ comment.text }}
+        <small class="timestamp">{{ comment.timestamp }}</small>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+function likePost(event) {
+  event.preventDefault();
+  const postId = document.getElementById('post_id').value;
+  fetch('/like_post/' + postId, { method: 'POST' })
+    .then(response => response.json())
+    .then(data => {
+      const likeBtn = document.getElementById('like-btn');
+      const count = document.getElementById('like-count');
+      if (data.status === 'liked') {
+        likeBtn.textContent = '❤️';
+        count.textContent = parseInt(count.textContent) + 1;
+      } else if (data.status === 'unliked') {
+        likeBtn.textContent = '🤍';
+        count.textContent = parseInt(count.textContent) - 1;
+      }
+    });
+}
+</script>
+
+{% endblock %}

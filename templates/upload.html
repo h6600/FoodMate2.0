@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="layout-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <i class="fas fa-utensils"></i>
+      <h1>Foodmate</h1>
+    </div>
+    <ul class="nav-links">
+      <li><a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+      <li><a href="/feed"><i class="fas fa-rss"></i> Feed</a></li>
+      <li><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
+      <li class="active"><a href="/upload"><i class="fas fa-plus"></i> Upload</a></li>
+      <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </aside>
+
+  <!-- Upload Page Main -->
+  <main class="dashboard-main">
+    <h2>Upload a New Food Post</h2>
+    <div class="upload-container">
+      <!-- Upload Form -->
+      <form class="upload-form" method="POST" enctype="multipart/form-data">
+        <label>Choose Image:</label>
+        <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required>
+
+        <label>Write a short review:</label>
+        <textarea name="review" placeholder="Describe the food..." oninput="previewReview(event)" required></textarea>
+
+        <button type="submit">Submit Post</button>
+      </form>
+
+      <!-- Live Preview -->
+      <div class="upload-preview">
+        <h4>Post Preview</h4>
+        <div class="post-item">
+          <img id="preview-img" src="https://cdn-icons-png.flaticon.com/512/2922/2922506.png" alt="Preview">
+          <div class="post-content">
+            <h4 id="preview-text">Your review will appear here</h4>
+            <p class="tag">🍴 predicted_tag</p>
+            <p class="meta"><i class="fas fa-heart"></i> 0 &nbsp; <i class="fas fa-comment"></i> 0</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function previewImage(event) {
+  const output = document.getElementById('preview-img');
+  output.src = URL.createObjectURL(event.target.files[0]);
+}
+function previewReview(event) {
+  const text = document.getElementById('preview-text');
+  text.textContent = event.target.value || "Your review will appear here";
+}
+</script>
+
+{% endblock %}
+

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="layout-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <i class="fas fa-utensils"></i>
+      <h1>Foodmate</h1>
+    </div>
+    <ul class="nav-links">
+      <li><a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+      <li class="active"><a href="/feed"><i class="fas fa-rss"></i> Feed</a></li>
+      <li><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
+      <li><a href="/upload"><i class="fas fa-plus"></i> Upload</a></li>
+      <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Feed Content -->
+  <main class="dashboard-main">
+    <div class="feed-header">
+      <h2>Explore Feed</h2>
+      <div class="view-toggle">
+        <button onclick="setFeedView('scroll')" class="feed-btn">📜 Scroll</button>
+        <button onclick="setFeedView('grid')" class="feed-btn">🔲 Grid</button>
+      </div>
+    </div>
+
+    <!-- Feed Container -->
+    <div id="feedContainer" class="feed-scroll">
+      {% for post in all_posts %}
+      <div class="feed-post" onclick="window.location='/post/{{ post._id }}'">
+        <img src="data:image/jpeg;base64,{{ post.image_base64 }}" alt="Food Post">
+        <div class="feed-text">
+          <h4>{{ post.review }}</h4>
+          <p class="tag">🍴 {{ post.predicted_tag }}</p>
+          <p class="meta">
+            <i class="fas fa-heart"></i> {{ post.likes | length if post.likes }}
+            &nbsp;
+            <i class="fas fa-comment"></i> {{ post.comments | length if post.comments }}
+          </p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <!-- Pagination Controls -->
+    <div class="pagination">
+      {% if current_page > 1 %}
+      <a href="{{ url_for('feed') }}?page={{ current_page - 1 }}" class="page-btn">← Previous</a>
+      {% endif %}
+
+      <span class="page-info">Page {{ current_page }} of {{ total_pages }}</span>
+
+      {% if current_page < total_pages %} <a href="{{ url_for('feed') }}?page={{ current_page + 1 }}" class="page-btn">
+        Next →</a>
+        {% endif %}
+    </div>
+
+  </main>
+</div>
+
+<!-- JS to switch views -->
+<script>
+  function setFeedView(view) {
+    const container = document.getElementById('feedContainer');
+    container.className = '';
+    container.classList.add('feed-' + view);
+  }
+</script>
+
+{% endblock %}

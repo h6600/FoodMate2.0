@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="layout-container">
+  <aside class="sidebar">
+    <div class="brand">
+      <i class="fas fa-utensils"></i>
+      <h1>Foodmate</h1>
+    </div>
+  </aside>
+  <main class="dashboard-main">
+    <div class="logout-box">
+      <h2>You've been logged out.</h2>
+      <p>Thanks for using Foodmate! 🍽️</p>
+      <a href="/login" class="new-post-btn">Log back in</a>
+    </div>
+  </main>
+</div>
+{% endblock %}
