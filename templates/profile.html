@@ -83,6 +83,12 @@
               <p>
                 <i class="fas fa-heart"></i> {{ post.likes | length if post.likes }} &nbsp;
                 <i class="fas fa-comment"></i> {{ post.comments | length if post.comments }}
+              <form method="POST" action="/delete_post/{{ post._id }}"
+                onsubmit="return confirm('Are you sure you want to delete this post?');">
+                <button type="submit" class="delete-btn" title="Delete Post" onclick="event.stopPropagation();">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
               </p>
             </div>
           </div>

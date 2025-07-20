@@ -877,3 +877,23 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+.delete-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  color: red;
+  padding: 6px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+}
+
+.profile-post-card {
+  position: relative;
+  overflow: hidden;
+}
+

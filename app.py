@@ -239,5 +239,22 @@ def trending_tags():
     tag_counts = Counter(tags).most_common(5)  # Top 5 trending tags
     return jsonify(tag_counts)
 
+@app.route('/delete_post/<post_id>', methods=['POST'])
+def delete_post(post_id):
+    if 'user' not in session:
+        return redirect('/login')
+
+    post = posts.find_one({'_id': ObjectId(post_id)})
+    if not post:
+        return "Post not found", 404
+
+    # Only allow if the logged-in user owns this post
+    if post.get('username') != session['user']:
+        return "Unauthorized", 403
+
+    posts.delete_one({'_id': ObjectId(post_id)})
+    return redirect('/profile')
+
+
 if __name__ == '__main__':
     app.run(debug=True)
