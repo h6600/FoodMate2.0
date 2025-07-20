@@ -824,3 +824,14 @@ body {
   background-color: #f46b45;
   color: white;
 }
+
+.username {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 4px 0;
+}
+
+.user-highlight {
+  color: #ff5e5e;  /* You can choose any theme color */
+  font-weight: bold;
+}

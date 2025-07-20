@@ -37,6 +37,7 @@
         <div class="post-info">
           <h4 class="post-title">{{ post.review }}</h4>
           <p class="tag">🍴 {{ post.predicted_tag }}</p>
+          <p class="username">Posted by: <span class="user-highlight">{{ post.username }}</span></p>
           <p class="meta post-meta">
             <i class="fas fa-heart"></i> {{ post.likes | length if post.likes }}
             &nbsp;
