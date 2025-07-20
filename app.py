@@ -119,14 +119,17 @@ def feed():
     view = request.args.get('view', 'scroll')  # default to 'scroll'
     page = int(request.args.get('page', 1))
 
-    # Set number of posts per page depending on view
+    user_map = {
+        user['username']: user.get('profile_pic')
+        for user in users.find({}, {'username': 1, 'profile_pic': 1})
+    }
     posts_per_page = 8 if view == 'grid' else 6
-
     total_posts = posts.count_documents({})
     total_pages = math.ceil(total_posts / posts_per_page)
     skip = (page - 1) * posts_per_page
     paginated_posts = list(posts.find().sort('_id', -1).skip(skip).limit(posts_per_page))
-
+    for post in paginated_posts:
+        post['profile_pic'] = user_map.get(post.get('username'))
     return render_template(
         'feed.html',
         all_posts=paginated_posts,
@@ -140,6 +143,8 @@ def feed():
 @app.route('/post/<post_id>')
 def view_post(post_id):
     post = posts.find_one({'_id': ObjectId(post_id)})
+    user = users.find_one({'username': post.get('username')})
+    post['profile_pic'] = user.get('profile_pic') if user else None
     if post:
         return render_template('post.html', post=post)
     return "Post not found", 404

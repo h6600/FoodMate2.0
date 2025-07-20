@@ -28,9 +28,9 @@
       <div class="post-card-standalone">
         <!-- User Header -->
         <div class="post-header">
-          <div class="avatar-circle">{{ post.username[0] }}</div>
-          <div class="user-info">
-            <strong>{{ post.username }}</strong>
+          <div class="user-row">
+            <img src="data:image/jpeg;base64,{{ post.profile_pic }}" class="user-avatar" alt="User">
+            <span class="username-feed">{{ post.username }}</span>
             <span class="tag-label">#{{ post.predicted_tag }}</span>
           </div>
         </div>

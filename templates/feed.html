@@ -30,19 +30,24 @@
     <!-- Feed Container -->
     <div id="feedContainer" class="feed-{{ current_view }}">
       {% for post in all_posts %}
-      <div class="feed-post post-card">
-        <a href="/post/{{ post._id }}">
-          <img src="data:image/jpeg;base64,{{ post.image_base64 }}" class="post-image" alt="Food Post">
-        </a>
-        <div class="post-info">
-          <h4 class="post-title">{{ post.review }}</h4>
-          <p class="tag">🍴 {{ post.predicted_tag }}</p>
-          <p class="username">Posted by: <span class="user-highlight">{{ post.username }}</span></p>
-          <p class="meta post-meta">
-            <i class="fas fa-heart"></i> {{ post.likes | length if post.likes }}
-            &nbsp;
-            <i class="fas fa-comment"></i> {{ post.comments | length if post.comments }}
-          </p>
+      <div class="feed-post-wrapper">
+        <div class="user-row">
+          <img src="data:image/jpeg;base64,{{ post.profile_pic }}" class="user-avatar" alt="User">
+          <span class="username-feed">{{ post.username }}</span>
+        </div>
+        <div class="feed-post">
+          <a href="/post/{{ post._id }}">
+            <img src="data:image/jpeg;base64,{{ post.image_base64 }}" class="post-image" alt="Food Post">
+          </a>
+          <div class="post-info">
+            <h4 class="post-title">{{ post.review }}</h4>
+            <p class="tag">🍴 {{ post.predicted_tag }}</p>
+            <p class="meta post-meta">
+              <i class="fas fa-heart"></i> {{ post.likes | length if post.likes }}
+              &nbsp;
+              <i class="fas fa-comment"></i> {{ post.comments | length if post.comments }}
+            </p>
+          </div>
         </div>
       </div>
       {% endfor %}
@@ -156,17 +161,10 @@
     background-color: #fff;
     padding: 16px;
     border-radius: 12px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     cursor: pointer;
-    transition: box-shadow 0.3s ease;
   }
 
-  .feed-scroll .feed-post:hover {
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  }
-
-  .feed-scroll .feed-post img {
+  .feed-scroll .feed-post > img {
     width: 150px;
     height: 150px;
     border-radius: 8px;
@@ -200,17 +198,9 @@
   /* Default shared post style */
   .feed-post {
     background-color: #fff;
-    padding: 16px;
     border-radius: 12px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     cursor: pointer;
-    transition: box-shadow 0.3s ease;
     overflow: hidden;
-  }
-
-  .feed-post:hover {
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   }
 
   /* SCROLL MODE */
