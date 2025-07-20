@@ -10,6 +10,7 @@ body {
   flex-direction: row;
 }
 .sidebar-post{
+  background: linear-gradient(to bottom right, #ff7043, #f4511e);
   flex: 1 10%;
 }
 .post-main{
@@ -744,7 +745,7 @@ body {
 
 .modal-content input,
 .modal-content textarea {
-  width: 100%;
+  width: 93%;
   padding: 10px;
   margin: 8px 0;
   border-radius: 6px;
