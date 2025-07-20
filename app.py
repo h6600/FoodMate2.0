@@ -42,7 +42,7 @@ def register():
             'email': request.form['email'],
             'password': request.form['password'],
             'about': request.form['about'],
-            'user_created_on': datetime.utcnow()
+            'user_created_on': datetime.datetime.now()
         }
         # Save to MongoDB
         if users.find_one({'username': data['username']}):
@@ -220,7 +220,7 @@ def edit_profile():
             updated_data['profile_pic'] = img_base64
 
     # Update in MongoDB
-    users.update_one({'username': session['username']}, {'$set': updated_data})
+    users.update_one({'username': session['user']}, {'$set': updated_data})
 
     flash('Profile updated successfully!')
     return redirect(url_for('profile'))
