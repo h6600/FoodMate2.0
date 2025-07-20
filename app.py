@@ -177,7 +177,7 @@ def comment_post(post_id):
     comment = {
         'username': session['user'],
         'text': comment_text,
-        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M')
+        'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
     }
 
     posts.update_one(
