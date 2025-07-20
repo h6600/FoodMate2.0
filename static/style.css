@@ -7,8 +7,18 @@ body {
 
 .layout-container {
   display: flex;
+  flex-direction: row;
 }
-
+.sidebar-post{
+  flex: 1 10%;
+}
+.post-main{
+  flex: 1 70%;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
 /* Sidebar */
 .sidebar {
   width: 240px;

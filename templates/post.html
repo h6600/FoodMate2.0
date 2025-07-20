@@ -4,66 +4,86 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<div class="post-view-container">
-  <div class="post-card-standalone">
-    <!-- User Header -->
-    <div class="post-header">
-      <div class="avatar-circle">{{ post.username[0] }}</div>
-      <div class="user-info">
-        <strong>{{ post.username }}</strong>
-        <span class="tag-label">#{{ post.predicted_tag }}</span>
+<div class="layout-container">
+  <!-- Sidebar -->
+  <div class="sidebar-post">
+    <aside class="sidebar">
+      <div class="brand">
+        <i class="fas fa-utensils"></i>
+        <h1>Foodmate</h1>
       </div>
-    </div>
-
-    <!-- Post Image -->
-    <div class="post-image-wrap">
-      <img src="data:image/png;base64,{{ post.image_base64 }}" alt="Food Image">
-    </div>
-
-    <!-- Like and Actions -->
-    <div class="post-actions">
-      <form class="like-form" onsubmit="likePost(event)">
-        <input type="hidden" id="post_id" value="{{ post._id }}">
-        <button type="submit" id="like-btn" class="like-btn">
-          {% if session['user'] in post.likes %}
-          ❤️
-          {% else %}
-          🤍
-          {% endif %}
-        </button>
-        <span id="like-count">{{ post.likes | length }}</span> likes
-      </form>
-    </div>
-
-    <!-- Review -->
-    <div class="post-caption">
-      <p><strong>{{ post.username }}</strong> </p>
-      {% if post.location and post.location.latitude and post.location.longitude %}
-      <h4>📍 Location</h4>
-      <div id="postMap" style="height: 300px; border-radius: 10px; margin-bottom: 20px;"></div>
-      {% endif %}
-      <p>{{ post.review }}</p>
-    </div>
-
-    <!-- Comment Form -->
-    <form method="POST" action="/comment_post/{{ post._id }}" class="comment-form">
-      <textarea name="comment" placeholder="Add a comment..." required></textarea>
-      <button type="submit">Post</button>
-    </form>
-
-    <!-- Comment List -->
-    <div class="comments">
-      {% for comment in post.comments %}
-      <div class="comment-bubble">
-        <strong>{{ comment.username }}</strong> {{ comment.text }}
-        <small class="timestamp">{{ comment.timestamp }}</small>
-      </div>
-      {% endfor %}
-    </div>
+      <ul class="nav-links">
+        <li><a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+        <li><a href="/feed"><i class="fas fa-rss"></i> Feed</a></li>
+        <li><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
+        <li class="active"><a href="/post/{{ post._id }}"><i class="fas fa-eye"></i> View Post</a></li>
+        <li><a href="/upload"><i class="fas fa-plus"></i> Upload</a></li>
+        <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      </ul>
+    </aside>
   </div>
-</div>
+  <!-- Main Post Area -->
+  <main class="post-main">
+    <div class="post-view-container">
+      <div class="post-card-standalone">
+        <!-- User Header -->
+        <div class="post-header">
+          <div class="avatar-circle">{{ post.username[0] }}</div>
+          <div class="user-info">
+            <strong>{{ post.username }}</strong>
+            <span class="tag-label">#{{ post.predicted_tag }}</span>
+          </div>
+        </div>
 
+        <!-- Post Image -->
+        <div class="post-image-wrap">
+          <img src="data:image/png;base64,{{ post.image_base64 }}" alt="Food Image">
+        </div>
+
+        <!-- Like and Actions -->
+        <div class="post-actions">
+          <form class="like-form" onsubmit="likePost(event)">
+            <input type="hidden" id="post_id" value="{{ post._id }}">
+            <button type="submit" id="like-btn" class="like-btn">
+              {% if session['user'] in post.likes %}
+              ❤️
+              {% else %}
+              🤍
+              {% endif %}
+            </button>
+            <span id="like-count">{{ post.likes | length }}</span> likes
+          </form>
+        </div>
+
+        <!-- Review -->
+        <div class="post-caption">
+          <p><strong>{{ post.username }}</strong> </p>
+          {% if post.location and post.location.latitude and post.location.longitude %}
+          <h4>📍 Location</h4>
+          <div id="postMap" style="height: 300px; border-radius: 10px; margin-bottom: 20px;"></div>
+          {% endif %}
+          <p>{{ post.review }}</p>
+        </div>
+
+        <!-- Comment Form -->
+        <form method="POST" action="/comment_post/{{ post._id }}" class="comment-form">
+          <textarea name="comment" placeholder="Add a comment..." required></textarea>
+          <button type="submit">Post</button>
+        </form>
+
+        <!-- Comment List -->
+        <div class="comments">
+          {% for comment in post.comments %}
+          <div class="comment-bubble">
+            <strong>{{ comment.username }}</strong> {{ comment.text }}
+            <small class="timestamp">{{ comment.timestamp }}</small>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
 <script>
   function likePost(event) {
     event.preventDefault();
@@ -85,7 +105,7 @@
 </script>
 {% if post.location and post.location.latitude and post.location.longitude %}
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     var postMapDiv = document.getElementById('postMap');
     if (postMapDiv) {
       const lat = parseFloat('{{ post.location.latitude }}');
