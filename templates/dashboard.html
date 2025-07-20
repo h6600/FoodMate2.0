@@ -26,52 +26,52 @@
       </div>
       <a href="/upload" class="new-post-btn"><i class="fas fa-plus"></i> New Post</a>
     </header>
-
-    <!-- Stats -->
-    <!-- <section class="stats-cards">
-      <div class="stat-card">
-        <div class="icon blue"><i class="fas fa-image"></i></div>
-        <div>
-          <p class="stat-title">Total Posts</p>
-          <h3>{{ post_count }}</h3>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="icon red"><i class="fas fa-heart"></i></div>
-        <div>
-          <p class="stat-title">Total Likes</p>
-          <h3>{{ like_count }}</h3>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="icon green"><i class="fas fa-comment"></i></div>
-        <div>
-          <p class="stat-title">Comments</p>
-          <h3>{{ comment_count }}</h3>
-        </div>
-      </div>
-    </section> -->
-
+    <div class="dashboard-trending">
+      <h3>🔥 Trending Tags</h3>
+      <ul id="trendingList">
+        <li>Loading...</li>
+      </ul>
+    </div>
+     
     <!-- Recent Posts -->
     <section class="recent-posts">
       <h3>Recent Posts</h3>
       <div class="post-list">
         {% for post in sample_posts %}
-        <div class="post-item">
-          <img src="data:image/jpeg;base64,{{ post.image_base64 }}" alt="Food Image">
-          <div class="post-content">
-            <h4>{{ post.review }}</h4>
-            <p class="tag">🍴 {{ post.predicted_tag }}</p>
-            <p class="meta">
-              <i class="fas fa-heart"></i> {{ post.likes | length if post.likes }} &nbsp;
-              <i class="fas fa-comment"></i> {{ post.comments | length if post.comments }}
-            </p>
+        <a style="text-decoration: none; color: inherit;" href="/post/{{ post._id }}">
+          <div class="post-item">
+            <img src="data:image/jpeg;base64,{{ post.image_base64 }}" alt="Food Image">
+            <div class="post-content">
+              <h4>{{ post.review }}</h4>
+              <p class="tag">🍴 {{ post.predicted_tag }}</p>
+              <p class="meta">
+                <i class="fas fa-heart"></i> {{ post.likes | length if post.likes }} &nbsp;
+                <i class="fas fa-comment"></i> {{ post.comments | length if post.comments }}
+              </p>
+            </div>
           </div>
-        </div>
+        </a>
         {% endfor %}
       </div>
     </section>
   </main>
 </div>
+<script>
+  fetch('/trending_tags')
+    .then(response => response.json())
+    .then(tags => {
+      const list = document.getElementById('trendingList');
+      list.innerHTML = ''; // Clear "Loading..."
+      tags.forEach(([tag, count]) => {
+        const item = document.createElement('li');
+        item.textContent = `🍽️ ${tag}`;
+        list.appendChild(item);
+      });
+    })
+    .catch(err => {
+      document.getElementById('trendingList').innerHTML = '<li>Error loading tags</li>';
+      console.error(err);
+    });
+</script>
 
 {% endblock %}

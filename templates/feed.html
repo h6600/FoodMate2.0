@@ -22,20 +22,22 @@
     <div class="feed-header">
       <h2>Explore Feed</h2>
       <div class="view-toggle">
-        <button onclick="setFeedView('scroll')" class="feed-btn">📜 Scroll</button>
-        <button onclick="setFeedView('grid')" class="feed-btn">🔲 Grid</button>
+        <button onclick="setFeedView('scroll')" class="feed-btn" id="btn-scroll">📜 Scroll</button>
+        <button onclick="setFeedView('grid')" class="feed-btn" id="btn-grid">🔲 Grid</button>
       </div>
     </div>
 
     <!-- Feed Container -->
-    <div id="feedContainer" class="feed-scroll">
+    <div id="feedContainer" class="feed-{{ current_view }}">
       {% for post in all_posts %}
-      <div class="feed-post" onclick="window.location='/post/{{ post._id }}'">
-        <img src="data:image/jpeg;base64,{{ post.image_base64 }}" alt="Food Post">
-        <div class="feed-text">
-          <h4>{{ post.review }}</h4>
+      <div class="feed-post post-card">
+        <a href="/post/{{ post._id }}">
+          <img src="data:image/jpeg;base64,{{ post.image_base64 }}" class="post-image" alt="Food Post">
+        </a>
+        <div class="post-info">
+          <h4 class="post-title">{{ post.review }}</h4>
           <p class="tag">🍴 {{ post.predicted_tag }}</p>
-          <p class="meta">
+          <p class="meta post-meta">
             <i class="fas fa-heart"></i> {{ post.likes | length if post.likes }}
             &nbsp;
             <i class="fas fa-comment"></i> {{ post.comments | length if post.comments }}
@@ -44,16 +46,17 @@
       </div>
       {% endfor %}
     </div>
+
     <!-- Pagination Controls -->
     <div class="pagination">
       {% if current_page > 1 %}
-      <a href="{{ url_for('feed') }}?page={{ current_page - 1 }}" class="page-btn">← Previous</a>
+      <a href="{{ url_for('feed', page=current_page-1, view=current_view) }}" class="page-btn">← Previous</a>
       {% endif %}
 
       <span class="page-info">Page {{ current_page }} of {{ total_pages }}</span>
 
-      {% if current_page < total_pages %} <a href="{{ url_for('feed') }}?page={{ current_page + 1 }}" class="page-btn">
-        Next →</a>
+      {% if current_page < total_pages %} <a href="{{ url_for('feed', page=current_page+1, view=current_view) }}"
+        class="page-btn">Next →</a>
         {% endif %}
     </div>
 
@@ -63,10 +66,200 @@
 <!-- JS to switch views -->
 <script>
   function setFeedView(view) {
-    const container = document.getElementById('feedContainer');
-    container.className = '';
-    container.classList.add('feed-' + view);
+    const params = new URLSearchParams(window.location.search);
+    params.set('view', view);
+    params.set('page', 1);  // reset to first page when switching
+    window.location.search = params.toString();
   }
 </script>
+
+
+<style>
+  .post-wrapper.grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .post-wrapper.scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .post-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: 0.3s;
+  }
+
+  .post-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .post-wrapper.grid .post-card {
+    width: 300px;
+  }
+
+  .post-wrapper.scroll .post-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px;
+  }
+
+  .post-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .post-wrapper.scroll .post-image {
+    width: 200px;
+    height: 150px;
+    flex-shrink: 0;
+  }
+
+  .post-info {
+    padding: 10px;
+  }
+
+  .post-wrapper.scroll .post-info {
+    padding: 0;
+  }
+
+  .post-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+
+  .tag {
+    font-size: 14px;
+    color: #555;
+  }
+
+  .post-meta {
+    font-size: 13px;
+    color: #888;
+    margin-top: 8px;
+  }
+
+  .feed-scroll .feed-post {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
+    background-color: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .feed-scroll .feed-post:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  .feed-scroll .feed-post img {
+    width: 150px;
+    height: 150px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  .feed-scroll .feed-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .feed-scroll .feed-text h4 {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .feed-scroll .feed-text .tag {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 8px;
+  }
+
+  .feed-scroll .feed-text .meta {
+    font-size: 0.85rem;
+    color: #666;
+  }
+
+  /* Default shared post style */
+  .feed-post {
+    background-color: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+    overflow: hidden;
+  }
+
+  .feed-post:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  /* SCROLL MODE */
+  .feed-scroll .feed-post {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .feed-scroll .feed-post img {
+    width: 150px;
+    height: 150px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  .feed-scroll .feed-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* GRID MODE */
+  .feed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .feed-grid .feed-post {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .feed-grid .feed-post img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .feed-grid .feed-text {
+    padding-top: 10px;
+    width: 100%;
+  }
+</style>
 
 {% endblock %}
