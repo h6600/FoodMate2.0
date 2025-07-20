@@ -135,7 +135,7 @@ body {
   background: white;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.05);
 }
 
 .post-list {
@@ -768,5 +768,59 @@ body {
   border: 3px solid #ff7043;
 }
 
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.grid-post {
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.grid-post:hover {
+  transform: scale(1.02);
+}
+
+.grid-post img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.grid-post-text {
+  padding: 10px;
+  text-align: center;
+}
 
 
+.dashboard-trending {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #ffd4bf;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.dashboard-trending h3 {
+  margin-bottom: 5px;
+}
+.dashboard-trending ul {
+  list-style-type: none;
+  padding: 0;
+}
+.dashboard-trending li {
+  margin: 6px 0;
+  font-weight: 500;
+}
+
+.feed-btn.active {
+  background-color: #f46b45;
+  color: white;
+}

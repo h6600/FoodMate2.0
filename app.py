@@ -1,3 +1,4 @@
+import math
 from flask import flash
 import os
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
@@ -9,6 +10,7 @@ from base64 import b64encode
 import base64
 import datetime
 from utils.classifier import predict_food_tag
+from collections import Counter
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -114,26 +116,26 @@ def upload():
 
 @app.route('/feed')
 def feed():
-    if 'user' not in session:
-        return redirect('/login')
-
-    # Get current page from URL, default to 1
+    view = request.args.get('view', 'scroll')  # default to 'scroll'
     page = int(request.args.get('page', 1))
-    per_page = 6
-    skip = (page - 1) * per_page
+
+    # Set number of posts per page depending on view
+    posts_per_page = 8 if view == 'grid' else 6
 
     total_posts = posts.count_documents({})
-    total_pages = (total_posts + per_page - 1) // per_page
-
-    # Fetch limited posts with skip
-    feed_posts = posts.find().sort([('_id', -1)]).skip(skip).limit(per_page)
+    total_pages = math.ceil(total_posts / posts_per_page)
+    skip = (page - 1) * posts_per_page
+    paginated_posts = list(posts.find().sort('_id', -1).skip(skip).limit(posts_per_page))
 
     return render_template(
         'feed.html',
-        all_posts=feed_posts,
+        all_posts=paginated_posts,
         current_page=page,
-        total_pages=total_pages
+        total_pages=total_pages,
+        current_view=view
     )
+
+
 
 @app.route('/post/<post_id>')
 def view_post(post_id):
@@ -225,6 +227,12 @@ def edit_profile():
     flash('Profile updated successfully!')
     return redirect(url_for('profile'))
 
+@app.route('/trending_tags')
+def trending_tags():
+    post_list = list(posts.find({}, {'predicted_tag': 1}))
+    tags = [post.get('predicted_tag') for post in post_list if post.get('predicted_tag')]
+    tag_counts = Counter(tags).most_common(5)  # Top 5 trending tags
+    return jsonify(tag_counts)
 
 if __name__ == '__main__':
     app.run(debug=True)
