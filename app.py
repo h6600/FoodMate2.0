@@ -11,6 +11,7 @@ import base64
 import datetime
 from utils.classifier import predict_food_tag
 from collections import Counter
+from sentiment_model import get_sentiment_label
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -179,11 +180,14 @@ def comment_post(post_id):
     comment_text = request.form.get('comment', '').strip()
     if not comment_text:
         return jsonify({'error': 'Comment is empty'}), 400
+    
+    sentiment = get_sentiment_label(comment_text)
 
     comment = {
         'username': session['user'],
         'text': comment_text,
-        'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M'),
+        'sentiment': sentiment
     }
 
     posts.update_one(
@@ -309,8 +313,6 @@ def feed():
         total_pages=total_pages,
         current_view=view
     )
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)

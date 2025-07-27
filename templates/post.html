@@ -77,6 +77,15 @@
           <div class="comment-bubble">
             <strong>{{ comment.username }}</strong> {{ comment.text }}
             <small class="timestamp">{{ comment.timestamp }}</small>
+            <p class="sentiment-tag">
+              {% if comment.sentiment == "Positive" %}
+              😊 Positive
+              {% elif comment.sentiment == "Negative" %}
+              😞 Negative
+              {% else %}
+              😐 Neutral
+              {% endif %}
+            </p>
           </div>
           {% endfor %}
         </div>
