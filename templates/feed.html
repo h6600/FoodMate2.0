@@ -78,6 +78,34 @@
     window.location.search = params.toString();
   }
 </script>
+<script>
+  // Redirect only if lat/lng not already present in URL
+  window.addEventListener('load', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.has('lat') || !urlParams.has('lng')) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          function (position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            // Preserve view + page from existing URL if present
+            const view = urlParams.get('view') || 'scroll';
+            const page = urlParams.get('page') || 1;
+
+            const newURL = `/feed?lat=${lat}&lng=${lng}&view=${view}&page=${page}`;
+            window.location.replace(newURL);
+          },
+          function (error) {
+            console.log("Geolocation failed or denied, showing all posts.");
+          }
+        );
+      }
+    }
+  });
+</script>
+
+
 
 
 <style>

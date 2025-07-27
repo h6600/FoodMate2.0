@@ -88,12 +88,11 @@ def upload():
             image_data = ""
         prediction = predict_food_tag(image_data)
         # Location
-        latitude = request.form.get('latitude')
-        longitude = request.form.get('longitude')
-        location = {
-            "latitude": float(latitude) if latitude else None,
-            "longitude": float(longitude) if longitude else None
-        }
+        restaurant = {
+           "name": request.form.get("restaurant_name"),
+           "lat": float(request.form.get("restaurant_lat")),
+           "lng": float(request.form.get("restaurant_lng"))
+      }
 
         # Save to MongoDB
         post_data = {
@@ -103,7 +102,7 @@ def upload():
             "timestamp": datetime.datetime.now(),
             "likes": [],
             "comments": [],
-            "location": location,
+            "restaurant": restaurant,
             "predicted_tag": prediction
         }
 
@@ -114,29 +113,29 @@ def upload():
     return render_template('upload.html')
 
 
-@app.route('/feed')
-def feed():
-    view = request.args.get('view', 'scroll')  # default to 'scroll'
-    page = int(request.args.get('page', 1))
+# @app.route('/feed')
+# def feed():
+#     view = request.args.get('view', 'scroll')  # default to 'scroll'
+#     page = int(request.args.get('page', 1))
 
-    user_map = {
-        user['username']: user.get('profile_pic')
-        for user in users.find({}, {'username': 1, 'profile_pic': 1})
-    }
-    posts_per_page = 8 if view == 'grid' else 6
-    total_posts = posts.count_documents({})
-    total_pages = math.ceil(total_posts / posts_per_page)
-    skip = (page - 1) * posts_per_page
-    paginated_posts = list(posts.find().sort('_id', -1).skip(skip).limit(posts_per_page))
-    for post in paginated_posts:
-        post['profile_pic'] = user_map.get(post.get('username'))
-    return render_template(
-        'feed.html',
-        all_posts=paginated_posts,
-        current_page=page,
-        total_pages=total_pages,
-        current_view=view
-    )
+#     user_map = {
+#         user['username']: user.get('profile_pic')
+#         for user in users.find({}, {'username': 1, 'profile_pic': 1})
+#     }
+#     posts_per_page = 8 if view == 'grid' else 6
+#     total_posts = posts.count_documents({})
+#     total_pages = math.ceil(total_posts / posts_per_page)
+#     skip = (page - 1) * posts_per_page
+#     paginated_posts = list(posts.find().sort('_id', -1).skip(skip).limit(posts_per_page))
+#     for post in paginated_posts:
+#         post['profile_pic'] = user_map.get(post.get('username'))
+#     return render_template(
+#         'feed.html',
+#         all_posts=paginated_posts,
+#         current_page=page,
+#         total_pages=total_pages,
+#         current_view=view
+#     )
 
 
 
@@ -254,6 +253,63 @@ def delete_post(post_id):
 
     posts.delete_one({'_id': ObjectId(post_id)})
     return redirect('/profile')
+
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371  # Radius of Earth in km
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = math.sin(dlat/2)**2 + math.cos(math.radians(lat1)) * \
+        math.cos(math.radians(lat2)) * math.sin(dlon/2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return R * c
+
+@app.route('/feed')
+def feed():
+    view = request.args.get('view', 'scroll')  # default to 'scroll'
+    page = int(request.args.get('page', 1))
+
+    lat = request.args.get('lat', type=float)
+    lng = request.args.get('lng', type=float)
+
+    user_map = {
+        user['username']: user.get('profile_pic')
+        for user in users.find({}, {'username': 1, 'profile_pic': 1})
+    }
+
+    # Pagination settings
+    posts_per_page = 8 if view == 'grid' else 6
+    skip = (page - 1) * posts_per_page
+
+    # Base query
+    all_posts = list(posts.find().sort('_id', -1))
+
+    # Filter by location if lat/lng provided
+    if lat and lng:
+        filtered_posts = []
+        for post in all_posts:
+            loc = post.get('restaurant', {})
+            if loc.get('lat') and loc.get('lng'):
+                distance = haversine(lat, lng, loc['lat'], loc['lng'])
+                if distance <= 10:
+                    post['distance'] = round(distance, 1)
+                    filtered_posts.append(post)
+        all_posts = filtered_posts
+
+    total_posts = len(all_posts)
+    total_pages = math.ceil(total_posts / posts_per_page)
+    paginated_posts = all_posts[skip:skip + posts_per_page]
+
+    for post in paginated_posts:
+        post['profile_pic'] = user_map.get(post.get('username'))
+
+    return render_template(
+        'feed.html',
+        all_posts=paginated_posts,
+        current_page=page,
+        total_pages=total_pages,
+        current_view=view
+    )
+
 
 
 if __name__ == '__main__':

@@ -7,6 +7,7 @@
 
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD33LjxMBS6CpJdvFWzDCBSWiE3ZGbPGJU&libraries=places"></script>
 
 <div class="layout-container">
   <!-- Sidebar -->
@@ -32,11 +33,22 @@
       <form class="upload-form" method="POST" enctype="multipart/form-data">
         <label>Choose Image:</label>
         <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required>
-        <h4>📍 Select Location (Where you ate this?)</h4>
+        <!-- <h4>📍 Select Location (Where you ate this?)</h4>
         <div id="map" style="height: 300px; border-radius: 10px; margin-bottom: 15px;"></div>
 
         <input type="hidden" id="latitude" name="latitude">
-        <input type="hidden" id="longitude" name="longitude">
+        <input type="hidden" id="longitude" name="longitude"> -->
+        <label for="restaurantSearch">Restaurant Location</label>
+        <input type="text" id="restaurantSearch" placeholder="Type restaurant or location" class="form-control">
+
+        <!-- Hidden Fields to store selected values -->
+        <input type="hidden" name="restaurant_name" id="restaurantName">
+        <input type="hidden" name="restaurant_lat" id="restaurantLat">
+        <input type="hidden" name="restaurant_lng" id="restaurantLng">
+
+        <!-- Map Preview -->
+        <div id="map" style="height: 300px; margin-top: 10px;"></div>
+
         <label>Write a short review:</label>
         <textarea name="review" placeholder="Describe the food..." oninput="previewReview(event)" required></textarea>
 
@@ -74,7 +86,7 @@
 <!-- Leaflet Geocoder JS -->
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
-<script>
+<!-- <script>
   const map = L.map('map').setView([20.5937, 78.9629], 5);  // Default to India
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -98,17 +110,65 @@
   const geocoder = L.Control.geocoder({
     defaultMarkGeocode: false
   })
-  .on('markgeocode', function(e) {
-    const latlng = e.geocode.center;
-    map.setView(latlng, 15);
-    updateCoordinates(latlng.lat, latlng.lng);
-  })
-  .addTo(map);
+    .on('markgeocode', function (e) {
+      const latlng = e.geocode.center;
+      map.setView(latlng, 15);
+      updateCoordinates(latlng.lat, latlng.lng);
+    })
+    .addTo(map);
 
   // Click-to-pin
-  map.on('click', function(e) {
+  map.on('click', function (e) {
     updateCoordinates(e.latlng.lat, e.latlng.lng);
   });
+</script> -->
+<script>
+let map, marker;
+
+function initAutocomplete() {
+  const input = document.getElementById("restaurantSearch");
+  const autocomplete = new google.maps.places.Autocomplete(input);
+
+  // Restrict results to establishments only
+  autocomplete.setTypes(['establishment']);
+
+  // On place selection
+  autocomplete.addListener("place_changed", () => {
+    const place = autocomplete.getPlace();
+    if (!place.geometry) return;
+
+    const name = place.name;
+    const lat = place.geometry.location.lat();
+    const lng = place.geometry.location.lng();
+
+    // Fill hidden inputs
+    document.getElementById("restaurantName").value = name;
+    document.getElementById("restaurantLat").value = lat;
+    document.getElementById("restaurantLng").value = lng;
+
+    // Show map
+    if (!map) {
+      map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 15,
+        center: { lat: lat, lng: lng }
+      });
+    } else {
+      map.setCenter({ lat: lat, lng: lng });
+    }
+
+    // Marker
+    if (marker) marker.setMap(null);
+    marker = new google.maps.Marker({
+      position: { lat: lat, lng: lng },
+      map: map,
+      title: name
+    });
+  });
+}
+
+// Load after window is ready
+window.addEventListener('load', initAutocomplete);
 </script>
+
 
 {% endblock %}
