@@ -1,32 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Register – Foodmate</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .role-options {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 16px;
+    }
+
+    .role-options label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .location-group {
+      margin-top: 10px;
+    }
+
+    input[type="radio"] {
+      transform: scale(1.1);
+    }
+  </style>
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD33LjxMBS6CpJdvFWzDCBSWiE3ZGbPGJU&libraries=places"></script>
 </head>
+
 <body class="login-body">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <i class="fas fa-user-plus"></i>
+        <h1>Create Your Foodmate Account</h1>
+        <p>Join the community and share your food experiences</p>
+      </div>
 
-<div class="login-container">
-  <div class="login-card">
-    <div class="login-header">
-      <i class="fas fa-user-plus"></i>
-      <h1>Create Your Foodmate Account</h1>
-      <p>Join the community and share your food experiences</p>
+      <form action="/register" method="POST" id="registerForm">
+        <div class="form-group"><input type="text" name="username" placeholder="Username" required></div>
+        <div class="form-group"><input type="text" name="firstname" placeholder="First Name" required></div>
+        <div class="form-group"><input type="text" name="lastname" placeholder="Last Name" required></div>
+        <div class="form-group"><input type="text" name="email" placeholder="Email" required></div>
+        <div class="form-group"><input type="password" name="password" placeholder="Password" required></div>
+        <div class="form-group"><input type="password" name="confirm" placeholder="Confirm Password" required></div>
+        <div class="form-group"><textarea name="bio" placeholder="About/Bio:"></textarea></div>
+
+        <!-- User Role Radio Buttons -->
+        <div class="form-group">
+          <label><strong>User Type:</strong></label>
+          <div class="role-options">
+            <label><input type="radio" name="role" value="owner" onchange="toggleLocationFields()"> Restaurant
+              Owner</label>
+            <label><input type="radio" name="role" value="blogger" onchange="toggleLocationFields()"> Food
+              Blogger</label>
+            <label><input type="radio" name="role" value="foodie" onchange="toggleLocationFields()"> Foodie</label>
+          </div>
+        </div>
+
+        <!-- Restaurant Location (Only for owner) -->
+        <div id="restaurantFields" class="location-group" style="display:none;">
+          <input type="text" id="restaurantSearch" name="restaurant_location" placeholder="Restaurant Location">
+          <input type="hidden" name="restaurant_name" id="restaurantName">
+          <input type="hidden" name="restaurant_lat" id="restaurantLat">
+          <input type="hidden" name="restaurant_lng" id="restaurantLng">
+        </div>
+
+        <!-- User Location -->
+        <div id="userLocationFields" class="location-group" style="display:none;">
+          <input type="text" name="state" id="state" placeholder="Your State / City">
+        </div>
+
+        <div class="form-group">
+          <button type="submit">Register</button>
+        </div>
+        <p class="hint">Already have an account? <a href="/login">Login here</a></p>
+      </form>
     </div>
-    <form method="POST">
-      <input type="text" name="username" placeholder="Username" required>
-      <input type="text" name="firstname" placeholder="First Name" required>
-      <input type="text" name="lastname" placeholder="Last Name" required>
-      <input type="text" name="email" placeholder="Email Address" required>
-      <input type="password" name="password" placeholder="Password" required>
-      <textarea name="about" placeholder="About you (bio)" rows="3"></textarea>
-      <button type="submit">Register</button>
-      <p class="hint">Already have an account? <a href="/login">Login here</a></p>
-    </form>
   </div>
-</div>
 
+  <script>
+    function toggleLocationFields() {
+      const role = document.querySelector('input[name="role"]:checked')?.value;
+      document.getElementById("restaurantFields").style.display = role === "owner" ? "block" : "none";
+      document.getElementById("userLocationFields").style.display = (role === "blogger" || role === "foodie") ? "block" : "none";
+    }
+
+    function initAutocomplete() {
+      const input = document.getElementById("restaurantSearch");
+      const autocomplete = new google.maps.places.Autocomplete(input);
+
+      // Restrict results to establishments only
+      autocomplete.setTypes(['establishment']);
+
+      // On place selection
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (!place.geometry) return;
+
+        const name = place.name;
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+
+        // Fill hidden inputs
+        document.getElementById("restaurantName").value = name;
+        document.getElementById("restaurantLat").value = lat;
+        document.getElementById("restaurantLng").value = lng;
+
+        // Show map
+        if (!map) {
+          map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 15,
+            center: { lat: lat, lng: lng }
+          });
+        } else {
+          map.setCenter({ lat: lat, lng: lng });
+        }
+
+        // Marker
+        if (marker) marker.setMap(null);
+        marker = new google.maps.Marker({
+          position: { lat: lat, lng: lng },
+          map: map,
+          title: name
+        });
+      });
+    }
+
+
+    window.onload = function () {
+      toggleLocationFields();
+      initAutocomplete();
+    };
+  </script>
 </body>
+
 </html>

@@ -366,10 +366,11 @@ body {
   align-items: center;
   justify-content: center;
   height: 100vh;
+  padding: 60px;
 }
 
 .login-container {
-  max-width: 400px;
+  max-width: 500px;
   width: 100%;
 }
 
@@ -399,6 +400,7 @@ body {
 
 .login-card form {
   margin-top: 20px;
+  margin-right: 20px;
 }
 
 .login-card input[type="text"],

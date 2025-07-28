@@ -12,6 +12,7 @@ import datetime
 from utils.classifier import predict_food_tag
 from collections import Counter
 from sentiment_model import get_sentiment_label
+import bcrypt
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -38,20 +39,68 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        data = {
-            'username': request.form['username'],
-            'firstname': request.form['firstname'],
-            'lastname': request.form['lastname'],
-            'email': request.form['email'],
-            'password': request.form['password'],
-            'about': request.form['about'],
-            'user_created_on': datetime.datetime.now()
+        username = request.form['username']
+        firstname = request.form['firstname']
+        lastname = request.form['lastname']
+        email = request.form['email']
+        password = request.form['password']
+        confirm = request.form['confirm']
+        bio = request.form['bio']
+        role = request.form['role']
+
+        # Validate password match
+        if password != confirm:
+            flash('Passwords do not match.')
+            return redirect('/register')
+
+        # Check if user already exists
+        if users.find_one({'username': username}):
+            flash('Username already exists.')
+            return redirect('/register')
+
+        # Hash password
+        hashed_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+        # Handle location based on role
+        location_info = {}
+        if role == 'owner':
+            location_info = {
+                "name": request.form.get("restaurant_name"),
+                "lat": float(request.form.get("restaurant_lat")),
+                "lng": float(request.form.get("restaurant_lng"))
+            }
+        else:
+            location_info = {
+                'state': request.form.get('state')
+            }
+
+
+        # Handle optional profile image upload
+        profile_pic = None
+        if 'profile_pic' in request.files:
+            file = request.files['profile_pic']
+            if file and file.filename != '':
+                img_data = file.read()
+                profile_pic = base64.b64encode(img_data).decode('utf-8')
+
+        # Build user object
+        user_data = {
+            'username': username,
+            'firstname': firstname,
+            'lastname': lastname,
+            'email': email,
+            'password': hashed_pw,
+            'bio': bio,
+            'role': role,
+            'location': location_info,
+            'created_on': datetime.datetime.now(),
+            'profile_pic': profile_pic
         }
-        # Save to MongoDB
-        if users.find_one({'username': data['username']}):
-            return "Username already exists", 400
-        users.insert_one(data)
+
+        users.insert_one(user_data)
+        flash('Registered successfully. Please log in.')
         return redirect('/login')
+
     return render_template('register.html')
 
 
@@ -93,7 +142,7 @@ def upload():
            "name": request.form.get("restaurant_name"),
            "lat": float(request.form.get("restaurant_lat")),
            "lng": float(request.form.get("restaurant_lng"))
-      }
+        }
 
         # Save to MongoDB
         post_data = {
