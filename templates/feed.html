@@ -10,9 +10,11 @@
     </div>
     <ul class="nav-links">
       <li><a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+      {% if session['role'] != 'owner' %}
       <li class="active"><a href="/feed"><i class="fas fa-rss"></i> Feed</a></li>
-      <li><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
       <li><a href="/upload"><i class="fas fa-plus"></i> Upload</a></li>
+      {% endif %}
+      <li><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
       <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
     </ul>
   </aside>
@@ -42,6 +44,9 @@
           <div class="post-info">
             <h4 class="post-title">{{ post.review }}</h4>
             <p class="tag">🍴 {{ post.predicted_tag }}</p>
+            {% if post.promoted %}
+            <span class="promoted-label">⭐ Promoted Post</span>
+            {% endif %}
             <p class="meta post-meta">
               <i class="fas fa-heart"></i> {{ post.likes | length if post.likes }}
               &nbsp;
@@ -192,7 +197,7 @@
     cursor: pointer;
   }
 
-  .feed-scroll .feed-post > img {
+  .feed-scroll .feed-post>img {
     width: 150px;
     height: 150px;
     border-radius: 8px;

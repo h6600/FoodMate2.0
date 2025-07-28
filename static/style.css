@@ -905,3 +905,19 @@ img {
   color: #666;
   margin-top: 2px;
 }
+
+.promote-btn {
+  margin-top: 5px;
+  background-color: #f89c56;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.promoted-label {
+  display: inline-block;
+  margin-top: 6px;
+  color: green;
+  font-weight: bold;
+}

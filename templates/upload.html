@@ -18,9 +18,11 @@
     </div>
     <ul class="nav-links">
       <li><a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
-      <li><a href="/feed"><i class="fas fa-rss"></i> Feed</a></li>
       <li><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
+      {% if session['role'] != 'owner' %}
+      <li><a href="/feed"><i class="fas fa-rss"></i> Feed</a></li>
       <li class="active"><a href="/upload"><i class="fas fa-plus"></i> Upload</a></li>
+      {% endif %}
       <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
     </ul>
   </aside>

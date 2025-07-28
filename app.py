@@ -32,6 +32,7 @@ def login():
         user = users.find_one({"username": request.form['username']})
         if user and user['password'] == request.form['password']:
             session['user'] = user['username']
+            session['role'] = user.get('role', 'user')
             return redirect('/dashboard')
         return render_template('login.html', error="Invalid username or password")
     return render_template('login.html')
@@ -57,9 +58,6 @@ def register():
         if users.find_one({'username': username}):
             flash('Username already exists.')
             return redirect('/register')
-
-        # Hash password
-        hashed_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
         # Handle location based on role
         location_info = {}
@@ -89,7 +87,7 @@ def register():
             'firstname': firstname,
             'lastname': lastname,
             'email': email,
-            'password': hashed_pw,
+            'password': password,
             'bio': bio,
             'role': role,
             'location': location_info,
@@ -248,15 +246,33 @@ def comment_post(post_id):
 
 # --- Profile Page View and Edit ---
 
+# @app.route('/profile')
+# def profile():
+#     if 'user' not in session:
+#         return redirect('/login')
+#     user_posts = list(posts.find({"username": session["user"]}))
+#     user = users.find_one({'username': session['user']})
+#     total_likes = sum(len(post.get('likes', [])) for post in user_posts)
+#     total_comments = sum(len(post.get('comments', [])) for post in user_posts)
+#     return render_template("profile.html", user_posts=user_posts, user=user,post_count=len(user_posts), total_likes=total_likes, total_comments=total_comments)
+
 @app.route('/profile')
 def profile():
     if 'user' not in session:
         return redirect('/login')
-    user_posts = list(posts.find({"username": session["user"]}))
+
     user = users.find_one({'username': session['user']})
-    total_likes = sum(len(post.get('likes', [])) for post in user_posts)
-    total_comments = sum(len(post.get('comments', [])) for post in user_posts)
-    return render_template("profile.html", user_posts=user_posts, user=user,post_count=len(user_posts), total_likes=total_likes, total_comments=total_comments)
+    role = user.get('role')
+
+    if role == 'owner':
+        # Fetch all posts tagged with this restaurant
+        location = user.get('location').get('name')
+        restaurant_posts = list(posts.find({'restaurant.name': location}).sort('_id', -1))
+        return render_template('profile.html', user=user, posts=restaurant_posts, is_owner=True)
+    else:
+        # Normal user – show their own posts
+        user_posts = list(posts.find({'username': session['user']}).sort('_id', -1))
+        return render_template('profile.html', user=user, posts=user_posts, is_owner=False)
 
 @app.route('/edit_profile', methods=['POST'])
 def edit_profile():
@@ -362,6 +378,19 @@ def feed():
         total_pages=total_pages,
         current_view=view
     )
+
+@app.route('/promote/<post_id>', methods=['POST'])
+def promote_post(post_id):
+    if 'user' not in session or session.get('role') != 'owner':
+        return redirect('/login')
+
+    user = users.find_one({'username': session['user']})
+    post = posts.find_one({'_id': ObjectId(post_id)})
+
+    if post and post.get('restaurant.name') == user.get('location.name'):
+        posts.update_one({'_id': ObjectId(post_id)}, {'$set': {'promoted': True}})
+    
+    return redirect('/profile')
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -9,9 +9,11 @@
     </div>
     <ul class="nav-links">
       <li><a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+      {% if session['role'] != 'owner' %}
       <li><a href="/feed"><i class="fas fa-rss"></i> Feed</a></li>
-      <li class="active"><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
       <li><a href="/upload"><i class="fas fa-plus"></i> Upload</a></li>
+      {% endif %}
+      <li class="active"><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
       <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
     </ul>
   </aside>
@@ -72,14 +74,28 @@
     <!-- User's Posts -->
     <section class="recent-posts">
       <div class="user-posts">
+        {% if is_owner %}
+        <h3>Posts Tagged with Your Restaurant</h3>
+        {% else %}
         <h3>Your Posts</h3>
+        {% endif %}
+
         <div class="posts-grid">
-          {% for post in user_posts %}
+          {% for post in posts %}
           <div class="grid-post" onclick="window.location='/post/{{ post._id }}'">
             <img src="data:image/jpeg;base64,{{ post.image_base64 }}" alt="Post Image" />
             <div class="grid-post-text">
               <strong>{{ post.review }}</strong>
               <p>🍴 {{ post.predicted_tag }}</p>
+              {% if not post.promoted %}
+              {% if is_owner %}
+              <form action="{{ url_for('promote_post', post_id=post._id) }}" method="POST">
+                <button type="submit" class="promote-btn">Promote</button>
+              </form>
+              {% endif %}
+              {% else %}
+              <span class="promoted-label">Promoted ⭐</span>
+              {% endif %}
               <p>
                 <i class="fas fa-heart"></i> {{ post.likes | length if post.likes }} &nbsp;
                 <i class="fas fa-comment"></i> {{ post.comments | length if post.comments }}
