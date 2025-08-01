@@ -13,6 +13,14 @@ from utils.classifier import predict_food_tag
 from collections import Counter
 from sentiment_model import get_sentiment_label
 import bcrypt
+import pickle
+import pandas as pd
+
+MODEL_PATH = "restaurant_model.pkl"
+model = None
+if os.path.exists(MODEL_PATH):
+    with open(MODEL_PATH, 'rb') as f:
+        model = pickle.load(f)
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -391,6 +399,73 @@ def promote_post(post_id):
         posts.update_one({'_id': ObjectId(post_id)}, {'$set': {'promoted': True}})
     
     return redirect('/profile')
+
+@app.route('/restaurant_dashboard')
+def restaurant_dashboard():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    current_user = users.find_one({'username': session['username']})
+    if not current_user or current_user.get('role') != 'restaurant_owner':
+        return redirect(url_for('dashboard'))
+
+    restaurant_name = current_user.get('restaurant_name')
+    restaurant_posts = list(posts.find({'restaurant.name': restaurant_name}))
+
+    total_posts = len(restaurant_posts)
+    total_likes = sum(len(p.get('likes', [])) for p in restaurant_posts)
+    total_comments = sum(len(p.get('comments', [])) for p in restaurant_posts)
+
+    # Sentiment count from comments
+    sentiment_counts = {'Positive': 0, 'Neutral': 0, 'Negative': 0}
+    for post in restaurant_posts:
+        for comment in post.get('comments', []):
+            sentiment = comment.get('sentiment', 'Neutral')
+            sentiment_counts[sentiment] = sentiment_counts.get(sentiment, 0) + 1
+
+    # Optional: also consider sentiment from review text if you added it
+    # for post in restaurant_posts:
+    #     if post.get('sentiment'):
+    #         sentiment_counts[post['sentiment']] += 1
+
+    # Prepare model input
+    if model:
+        df = pd.DataFrame([{
+            'likes': len(p.get('likes', [])),
+            'comments': len(p.get('comments', [])),
+            'positive_comments': sum(1 for c in p.get('comments', []) if c.get('sentiment') == 'Positive'),
+            'neutral_comments': sum(1 for c in p.get('comments', []) if c.get('sentiment') == 'Neutral'),
+            'negative_comments': sum(1 for c in p.get('comments', []) if c.get('sentiment') == 'Negative'),
+            'tag': p.get('predicted_tag', 'unknown')
+        } for p in restaurant_posts])
+
+        if not df.empty:
+            # One-hot encode tags if needed
+            df_encoded = pd.get_dummies(df)
+            # Align with model's expected columns
+            model_cols = model.feature_names_in_
+            for col in model_cols:
+                if col not in df_encoded:
+                    df_encoded[col] = 0
+            df_encoded = df_encoded[model_cols]
+
+            prediction = model.predict(df_encoded)
+            restaurant_score = round(prediction.mean(), 2)  # Average score of all posts
+        else:
+            restaurant_score = None
+    else:
+        restaurant_score = None
+
+    return render_template(
+        'restaurant_dashboard.html',
+        restaurant_name=restaurant_name,
+        total_posts=total_posts,
+        total_likes=total_likes,
+        total_comments=total_comments,
+        sentiment_counts=sentiment_counts,
+        restaurant_score=restaurant_score
+    )
+
 
 if __name__ == '__main__':
     app.run(debug=True)

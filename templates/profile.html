@@ -8,7 +8,11 @@
       <h1>Foodmate</h1>
     </div>
     <ul class="nav-links">
-      <li><a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+      {% if session['role'] == 'owner' %}
+      <li><a href="/restaurant_dashboard" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+      {% else %}
+      <li class="active"><a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+      {% endif %}
       {% if session['role'] != 'owner' %}
       <li><a href="/feed"><i class="fas fa-rss"></i> Feed</a></li>
       <li><a href="/upload"><i class="fas fa-plus"></i> Upload</a></li>
