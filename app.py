@@ -210,7 +210,7 @@ def view_post(post_id):
 
 @app.route('/like_post/<post_id>', methods=['POST'])
 def like_post(post_id):
-    username = session['username']
+    username = session['user']
     post = posts.find_one({'_id': ObjectId(post_id)})
 
     if username in post.get('likes', []):
@@ -226,7 +226,7 @@ def like_post(post_id):
 
 @app.route('/dislike_post/<post_id>', methods=['POST'])
 def dislike_post(post_id):
-    username = session['username']
+    username = session['user']
     post = posts.find_one({'_id': ObjectId(post_id)})
 
     if username in post.get('dislikes', []):
@@ -419,36 +419,41 @@ def restaurant_dashboard():
         return redirect(url_for('login'))
 
     current_user = users.find_one({'username': session['user']})
-    # if not current_user or current_user.get('role') != 'owner':
-    #     return redirect(url_for('dashboard'))
-
-    restaurant_name = current_user.get('location.name')
+    restaurant_name = current_user.get('location').get('name')
     restaurant_posts = list(posts.find({'restaurant.name': restaurant_name}))
 
     total_posts = len(restaurant_posts)
     total_likes = sum(len(p.get('likes', [])) for p in restaurant_posts)
+    total_dislikes = sum(len(p.get('dislikes', [])) for p in restaurant_posts)
     total_comments = sum(len(p.get('comments', [])) for p in restaurant_posts)
 
-    # Sentiment count from comments
+    # Sentiment count from reviews and comments (case-insensitive, robust)
     sentiment_counts = {'Positive': 0, 'Neutral': 0, 'Negative': 0}
     for post in restaurant_posts:
+        # Review sentiment
+        review_sentiment = post.get('review_sentiment')
+        review_sentiment = review_sentiment.lower()
+        if review_sentiment in ['positive', 'neutral', 'negative']:
+            sentiment_counts[review_sentiment.capitalize()] += 1
+        # Comment sentiments
         for comment in post.get('comments', []):
-            sentiment = comment.get('sentiment', 'Neutral')
-            sentiment_counts[sentiment] = sentiment_counts.get(sentiment, 0) + 1
-
-    # Optional: also consider sentiment from review text if you added it
-    # for post in restaurant_posts:
-    #     if post.get('sentiment'):
-    #         sentiment_counts[post['sentiment']] += 1
+            comment_sentiment = comment.get('sentiment')
+            comment_sentiment = comment_sentiment.lower()
+            if comment_sentiment in ['positive', 'neutral', 'negative']:
+                sentiment_counts[comment_sentiment.capitalize()] += 1
 
     # Prepare model input
     if model:
         df = pd.DataFrame([{
             'likes': len(p.get('likes', [])),
+            'dislikes': len(p.get('dislikes', [])),
             'comments': len(p.get('comments', [])),
-            'positive_comments': sum(1 for c in p.get('comments', []) if c.get('sentiment') == 'Positive'),
-            'neutral_comments': sum(1 for c in p.get('comments', []) if c.get('sentiment') == 'Neutral'),
-            'negative_comments': sum(1 for c in p.get('comments', []) if c.get('sentiment') == 'Negative'),
+            'positive_comments': sum(1 for c in p.get('comments', []) if c.get('sentiment') == 'positive'),
+            'neutral_comments': sum(1 for c in p.get('comments', []) if c.get('sentiment') == 'neutral'),
+            'negative_comments': sum(1 for c in p.get('comments', []) if c.get('sentiment') == 'negative'),
+            'review_positive': 1 if p.get('review_sentiment') == 'positive' else 0,
+            'review_neutral': 1 if p.get('review_sentiment') == 'neutral' else 0,
+            'review_negative': 1 if p.get('review_sentiment') == 'negative' else 0,
             'tag': p.get('predicted_tag', 'unknown')
         } for p in restaurant_posts])
 
@@ -471,10 +476,11 @@ def restaurant_dashboard():
 
     return render_template(
         'restaurant_dashboard.html',
-        user = current_user,
+        user=current_user,
         restaurant_name=restaurant_name,
         total_posts=total_posts,
         total_likes=total_likes,
+        total_dislikes=total_dislikes,
         total_comments=total_comments,
         sentiment_counts=sentiment_counts,
         restaurant_score=restaurant_score
