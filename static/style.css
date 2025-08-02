@@ -708,6 +708,10 @@ body {
   margin-top: 5px;
 }
 
+.bio{
+  width: 850px;
+}
+
 .stats {
   margin-top: 8px;
 }

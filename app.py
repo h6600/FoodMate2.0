@@ -41,7 +41,10 @@ def login():
         if user and user['password'] == request.form['password']:
             session['user'] = user['username']
             session['role'] = user.get('role', 'user')
-            return redirect('/dashboard')
+            if user.get('role') == 'owner':
+                return redirect('/restaurant_dashboard')
+            else:
+                return redirect('/dashboard')
         return render_template('login.html', error="Invalid username or password")
     return render_template('login.html')
 
@@ -402,14 +405,14 @@ def promote_post(post_id):
 
 @app.route('/restaurant_dashboard')
 def restaurant_dashboard():
-    if 'username' not in session:
+    if 'user' not in session:
         return redirect(url_for('login'))
 
-    current_user = users.find_one({'username': session['username']})
-    if not current_user or current_user.get('role') != 'restaurant_owner':
-        return redirect(url_for('dashboard'))
+    current_user = users.find_one({'username': session['user']})
+    # if not current_user or current_user.get('role') != 'owner':
+    #     return redirect(url_for('dashboard'))
 
-    restaurant_name = current_user.get('restaurant_name')
+    restaurant_name = current_user.get('location.name')
     restaurant_posts = list(posts.find({'restaurant.name': restaurant_name}))
 
     total_posts = len(restaurant_posts)
@@ -443,11 +446,11 @@ def restaurant_dashboard():
             # One-hot encode tags if needed
             df_encoded = pd.get_dummies(df)
             # Align with model's expected columns
-            model_cols = model.feature_names_in_
+            model_cols = getattr(model, 'feature_names_in_', df_encoded.columns)
             for col in model_cols:
                 if col not in df_encoded:
                     df_encoded[col] = 0
-            df_encoded = df_encoded[model_cols]
+            df_encoded = df_encoded[list(model_cols)]
 
             prediction = model.predict(df_encoded)
             restaurant_score = round(prediction.mean(), 2)  # Average score of all posts
@@ -458,6 +461,7 @@ def restaurant_dashboard():
 
     return render_template(
         'restaurant_dashboard.html',
+        user = current_user,
         restaurant_name=restaurant_name,
         total_posts=total_posts,
         total_likes=total_likes,
