@@ -50,17 +50,18 @@
 
         <!-- Like and Actions -->
         <div class="post-actions">
-          <form class="like-form" onsubmit="likePost(event)">
-            <input type="hidden" id="post_id" value="{{ post._id }}">
-            <button type="submit" id="like-btn" class="like-btn">
-              {% if session['user'] in post.likes %}
-              ❤️
-              {% else %}
-              🤍
-              {% endif %}
+          <form action="/like_post/{{ post._id }}" method="POST" style="display:inline;">
+            <button type="submit" class="reaction-btn" title="Like">
+              👍 <span>{{ post.likes | length if post.likes }}</span>
             </button>
-            <span id="like-count">{{ post.likes | length }}</span> likes
           </form>
+        
+          <form action="/dislike_post/{{ post._id }}" method="POST" style="display:inline;">
+            <button type="submit" class="reaction-btn" title="Dislike">
+              👎 <span>{{ post.dislikes | length if post.dislikes }}</span>
+            </button>
+          </form>
+        
         </div>
 
         <!-- Review -->

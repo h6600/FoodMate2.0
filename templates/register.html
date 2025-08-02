@@ -61,7 +61,6 @@
               Owner</label>
             <label><input type="radio" name="role" value="blogger" onchange="toggleLocationFields()"> Food
               Blogger</label>
-            <label><input type="radio" name="role" value="foodie" onchange="toggleLocationFields()"> Foodie</label>
           </div>
         </div>
 
@@ -90,7 +89,7 @@
     function toggleLocationFields() {
       const role = document.querySelector('input[name="role"]:checked')?.value;
       document.getElementById("restaurantFields").style.display = role === "owner" ? "block" : "none";
-      document.getElementById("userLocationFields").style.display = (role === "blogger" || role === "foodie") ? "block" : "none";
+      document.getElementById("userLocationFields").style.display = (role === "blogger") ? "block" : "none";
     }
 
     function initAutocomplete() {

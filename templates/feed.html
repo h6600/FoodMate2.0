@@ -51,11 +51,21 @@
             {% if post.promoted %}
             <span class="promoted-label">⭐ Promoted Post</span>
             {% endif %}
-            <p class="meta post-meta">
-              <i class="fas fa-heart"></i> {{ post.likes | length if post.likes }}
-              &nbsp;
-              <i class="fas fa-comment"></i> {{ post.comments | length if post.comments }}
-            </p>
+            <div class="meta-info">
+              <form action="/like_post/{{ post._id }}" method="POST" style="display:inline;"
+                onclick="event.stopPropagation();">
+                <button type="submit" class="reaction-btn" title="Like">👍
+                  <span>{{ post.likes|length if post.likes }}</span>
+                </button>
+              </form>
+              <form action="/dislike_post/{{ post._id }}" method="POST" style="display:inline;"
+                onclick="event.stopPropagation();">
+                <button type="submit" class="reaction-btn" title="Dislike">👎
+                  <span>{{ post.dislikes|length if post.dislikes }}</span>
+                </button>
+              </form>
+              <i class="fas fa-comment"></i> {{ post.comments|length if post.comments }}
+            </div>
           </div>
         </div>
       </div>
@@ -288,6 +298,13 @@
     padding-top: 10px;
     width: 100%;
   }
+
+  .meta-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+ }
 </style>
 
 {% endblock %}

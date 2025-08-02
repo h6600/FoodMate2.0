@@ -925,3 +925,17 @@ img {
   color: green;
   font-weight: bold;
 }
+
+.reaction-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  margin: 0 5px;
+  cursor: pointer;
+  color: #444;
+}
+
+.reaction-btn:hover {
+  transform: scale(1.1);
+  color: #ff5722;
+}

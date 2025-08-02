@@ -11,7 +11,7 @@ import base64
 import datetime
 from utils.classifier import predict_food_tag
 from collections import Counter
-from sentiment_model import get_sentiment_label
+from sentiment_model import predict_sentiment
 import bcrypt
 import pickle
 import pandas as pd
@@ -156,6 +156,7 @@ def upload():
         # Save to MongoDB
         post_data = {
             "review": review,
+            "review_sentiment": predict_sentiment(review),
             "image_base64": image_data,
             "username": user,
             "timestamp": datetime.datetime.now(),
@@ -209,26 +210,35 @@ def view_post(post_id):
 
 @app.route('/like_post/<post_id>', methods=['POST'])
 def like_post(post_id):
-    if 'user' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-
+    username = session['username']
     post = posts.find_one({'_id': ObjectId(post_id)})
-    if not post:
-        return jsonify({'error': 'Post not found'}), 404
 
-    username = session['user']
-    likes = post.get('likes', [])
-    
-    if username in likes:
-        # Unlike
+    if username in post.get('likes', []):
+        # Already liked, so remove
         posts.update_one({'_id': ObjectId(post_id)}, {'$pull': {'likes': username}})
-        action = 'unliked'
     else:
-        # Like
+        # Remove from dislikes if present
+        posts.update_one({'_id': ObjectId(post_id)}, {'$pull': {'dislikes': username}})
+        # Add to likes
         posts.update_one({'_id': ObjectId(post_id)}, {'$addToSet': {'likes': username}})
-        action = 'liked'
 
-    return jsonify({'status': action})
+    return redirect(f"/post/{post_id}")
+
+@app.route('/dislike_post/<post_id>', methods=['POST'])
+def dislike_post(post_id):
+    username = session['username']
+    post = posts.find_one({'_id': ObjectId(post_id)})
+
+    if username in post.get('dislikes', []):
+        # Already disliked, so remove
+        posts.update_one({'_id': ObjectId(post_id)}, {'$pull': {'dislikes': username}})
+    else:
+        # Remove from likes if present
+        posts.update_one({'_id': ObjectId(post_id)}, {'$pull': {'likes': username}})
+        # Add to dislikes
+        posts.update_one({'_id': ObjectId(post_id)}, {'$addToSet': {'dislikes': username}})
+
+    return redirect(f"/post/{post_id}")
 
 @app.route('/comment_post/<post_id>', methods=['POST'])
 def comment_post(post_id):
@@ -239,7 +249,7 @@ def comment_post(post_id):
     if not comment_text:
         return jsonify({'error': 'Comment is empty'}), 400
     
-    sentiment = get_sentiment_label(comment_text)
+    sentiment = predict_sentiment(comment_text)
 
     comment = {
         'username': session['user'],
