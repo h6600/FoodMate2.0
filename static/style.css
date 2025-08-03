@@ -233,7 +233,8 @@ body {
 .view-toggle .feed-btn {
   padding: 6px 12px;
   margin-left: 10px;
-  background: #eee;
+  background: #ff7043;
+  color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -241,7 +242,8 @@ body {
 }
 
 .view-toggle .feed-btn:hover {
-  background: #ddd;
+  background: lightgray;
+  color: black;
 }
 
 /* Default scroll view */
@@ -876,7 +878,7 @@ body {
 .username-feed {
   font-weight: bold;
   font-size: 0.95rem;
-  color: #f46b45;
+  color: black;
 }
 
 /* Prevent global img styles from interfering */

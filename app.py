@@ -31,7 +31,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/')
-def home():
+def default():
     return redirect('/login')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -242,18 +242,6 @@ def comment_post(post_id):
     )
 
     return redirect(url_for('view_post', post_id=post_id))
-
-# --- Profile Page View and Edit ---
-
-# @app.route('/profile')
-# def profile():
-#     if 'user' not in session:
-#         return redirect('/login')
-#     user_posts = list(posts.find({"username": session["user"]}))
-#     user = users.find_one({'username': session['user']})
-#     total_likes = sum(len(post.get('likes', [])) for post in user_posts)
-#     total_comments = sum(len(post.get('comments', [])) for post in user_posts)
-#     return render_template("profile.html", user_posts=user_posts, user=user,post_count=len(user_posts), total_likes=total_likes, total_comments=total_comments)
 
 @app.route('/profile')
 def profile():
@@ -639,6 +627,10 @@ def predict_tag():
         return jsonify({'error': 'No image provided'}), 400
     tag = predict_food_tag(image_base64)
     return jsonify({'predicted_tag': tag})
+
+@app.route('/foodMate')
+def home():
+    return render_template('home.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

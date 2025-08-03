@@ -35,53 +35,52 @@
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD33LjxMBS6CpJdvFWzDCBSWiE3ZGbPGJU&libraries=places"></script>
 </head>
 
-<body class="login-body">
-  <div class="login-container">
-    <div class="login-card">
-      <div class="login-header">
-        <i class="fas fa-user-plus"></i>
-        <h1>Create Your Foodmate Account</h1>
-        <p>Join the community and share your food experiences</p>
-      </div>
-
-      <form action="/register" method="POST" id="registerForm">
-        <div class="form-group"><input type="text" name="username" placeholder="Username" required></div>
-        <div class="form-group"><input type="text" name="firstname" placeholder="First Name" required></div>
-        <div class="form-group"><input type="text" name="lastname" placeholder="Last Name" required></div>
-        <div class="form-group"><input type="text" name="email" placeholder="Email" required></div>
-        <div class="form-group"><input type="password" name="password" placeholder="Password" required></div>
-        <div class="form-group"><input type="password" name="confirm" placeholder="Confirm Password" required></div>
-        <div class="form-group"><textarea name="bio" placeholder="About/Bio:"></textarea></div>
-
-        <!-- User Role Radio Buttons -->
-        <div class="form-group">
-          <label><strong>User Type:</strong></label>
-          <div class="role-options">
-            <label><input type="radio" name="role" value="owner" onchange="toggleLocationFields()"> Restaurant
-              Owner</label>
-            <label><input type="radio" name="role" value="blogger" onchange="toggleLocationFields()"> Food
-              Blogger</label>
+<body class="login-body" style="margin:0; padding:0;">
+  <div style="width:100vw; height:100vh; position:fixed; top:0; left:0; z-index:0;">
+    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80" alt="food background" style="width:100vw; height:100vh; object-fit:cover; filter:brightness(0.7);">
+    <div style="position:absolute; top:0; left:0; width:100vw; height:100vh; background:rgba(255,255,255,0.05);"></div>
+  </div>
+  <div style="position:relative; z-index:1;">
+    <div class="login-container" style="display:flex; justify-content:center; align-items:center; min-height:100vh;">
+      <div class="login-card" style="background:rgba(255,255,255,0.95); border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.15); padding:32px 36px; min-width:320px; max-width:400px; margin:32px auto; width:100%; box-sizing:border-box;">
+        <div class="login-header" style="text-align:center;">
+          <i class="fas fa-user-plus" style="font-size:2rem; color:#ff6347;"></i>
+          <h1 style="margin:12px 0 4px; font-size:2rem; color:#ff6347;">Create Your Foodmate Account</h1>
+          <p style="margin-bottom:18px; color:#333;">Join the community and share your food experiences</p>
+        </div>
+        <form action="/register" method="POST" id="registerForm">
+          <div class="form-group"><input type="text" name="username" placeholder="Username" required></div>
+          <div class="form-group"><input type="text" name="firstname" placeholder="First Name" required></div>
+          <div class="form-group"><input type="text" name="lastname" placeholder="Last Name" required></div>
+          <div class="form-group"><input type="text" name="email" placeholder="Email" required></div>
+          <div class="form-group"><input type="password" name="password" placeholder="Password" required></div>
+          <div class="form-group"><input type="password" name="confirm" placeholder="Confirm Password" required></div>
+          <div class="form-group"><textarea name="bio" placeholder="About/Bio:"></textarea></div>
+          <!-- User Role Radio Buttons -->
+          <div class="form-group">
+            <label><strong>User Type:</strong></label>
+            <div class="role-options">
+              <label><input type="radio" name="role" value="owner" onchange="toggleLocationFields()"> Restaurant Owner</label>
+              <label><input type="radio" name="role" value="blogger" onchange="toggleLocationFields()"> Food Blogger</label>
+            </div>
           </div>
-        </div>
-
-        <!-- Restaurant Location (Only for owner) -->
-        <div id="restaurantFields" class="location-group" style="display:none;">
-          <input type="text" id="restaurantSearch" name="restaurant_location" placeholder="Restaurant Location">
-          <input type="hidden" name="restaurant_name" id="restaurantName">
-          <input type="hidden" name="restaurant_lat" id="restaurantLat">
-          <input type="hidden" name="restaurant_lng" id="restaurantLng">
-        </div>
-
-        <!-- User Location -->
-        <div id="userLocationFields" class="location-group" style="display:none;">
-          <input type="text" name="state" id="state" placeholder="Your State / City">
-        </div>
-
-        <div class="form-group">
-          <button type="submit">Register</button>
-        </div>
-        <p class="hint">Already have an account? <a href="/login">Login here</a></p>
-      </form>
+          <!-- Restaurant Location (Only for owner) -->
+          <div id="restaurantFields" class="location-group" style="display:none;">
+            <input type="text" id="restaurantSearch" name="restaurant_location" placeholder="Restaurant Location">
+            <input type="hidden" name="restaurant_name" id="restaurantName">
+            <input type="hidden" name="restaurant_lat" id="restaurantLat">
+            <input type="hidden" name="restaurant_lng" id="restaurantLng">
+          </div>
+          <!-- User Location -->
+          <div id="userLocationFields" class="location-group" style="display:none;">
+            <input type="text" name="state" id="state" placeholder="Your State / City">
+          </div>
+          <div class="form-group">
+            <button type="submit" style="width:100%; background:#ff6347; color:#fff; border:none; border-radius:6px; padding:10px 0; font-weight:600; margin-bottom:10px;">Register</button>
+          </div>
+          <p class="hint" style="text-align:center; margin-top:8px;">Already have an account? <a href="/login" style="color:#ff6347; text-decoration:underline;">Login here</a></p>
+        </form>
+      </div>
     </div>
   </div>
 

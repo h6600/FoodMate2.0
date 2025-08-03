@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foodmate - Discover Food Experiences</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <nav class="flex justify-between items-center px-8 py-4 bg-white shadow-md fixed w-full z-10">
+    <h1 class="text-2xl font-bold text-red-500">🍽️ FoodMate</h1>
+    <div class="space-x-4">
+      <a href="{{ url_for('login') }}" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Login</a>
+      <a href="{{ url_for('register') }}" class="px-4 py-2 border border-red-500 text-red-500 rounded hover:bg-red-50">Register</a>
+    </div>
+  </nav>
+  <!-- Hero Banner -->
+  <section class="relative">
+    <img src="{{ url_for('static', filename='/banner.jpg') }}"
+         alt="Foodmate Banner"
+         class="w-full h-96 object-cover brightness-75" />
+    <div class="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
+      <h1 class="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg text-red-500">Welcome to Foodmate</h1>
+      <p class="text-xl md:text-2xl font-medium drop-shadow text-red-500">Discover. Share. Enjoy.</p>
+    </div>
+  </section>
+
+  <!-- Section 1: Explore Restaurants -->
+  <section class="bg-white py-16">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center gap-10">
+      <div class="w-full md:w-1/2" data-aos="fade-right">
+        <img src="{{ url_for('static', filename='/explore.jpg') }}" alt="Explore" class="w-full rounded-xl shadow-lg" />
+      </div>
+      <div class="w-full md:w-1/2 text-left" data-aos="fade-left">
+        <h2 class="text-3xl font-bold mb-4">Explore Restaurants</h2>
+        <p class="text-gray-600 text-lg">
+          Discover top-rated restaurants near you using real reviews, interactive maps, and AI-powered suggestions.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: Upload Reviews -->
+  <section class="bg-gray-100 py-16">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row-reverse items-center gap-10">
+      <div class="w-full md:w-1/2" data-aos="fade-left">
+        <img src="{{ url_for('static', filename='/upload.jpg') }}" alt="Upload" class="w-full rounded-xl shadow-lg" />
+      </div>
+      <div class="w-full md:w-1/2 text-left" data-aos="fade-right">
+        <h2 class="text-3xl font-bold mb-4">Upload Reviews</h2>
+        <p class="text-gray-600 text-lg">
+          Share your favorite food moments by uploading photos, giving feedback, and tagging locations on the map.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Personalized Feed -->
+  <section class="bg-white py-16">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center gap-10">
+      <div class="w-full md:w-1/2" data-aos="fade-right">
+        <img src="{{ url_for('static', filename='/feed.png') }}" alt="Feed" class="w-full rounded-xl shadow-lg" />
+      </div>
+      <div class="w-full md:w-1/2 text-left" data-aos="fade-left">
+        <h2 class="text-3xl font-bold mb-4">Personalized Feed</h2>
+        <p class="text-gray-600 text-lg">
+          Get a curated feed of food experiences tailored to your tastes, followers, and favorite cuisines.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- AOS Animation JS -->
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+  <script>
+    AOS.init({
+      duration: 1000,
+      once: true
+    });
+  </script>
+
+</body>
+</html>

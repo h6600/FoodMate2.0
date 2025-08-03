@@ -6,23 +6,27 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body class="login-body">
-
-<div class="login-container">
-  <div class="login-card">
-    <div class="login-header">
-      <i class="fas fa-utensils"></i>
-      <h1>Welcome to Foodmate</h1>
-      <p>Share your reviews & discover food</p>
-    </div>
-    <form method="POST">
-      <input type="text" name="username" placeholder="Enter Username" required>
-      <input type="password" name="password" placeholder="Enter Password" required>
-      <button type="submit">Login</button>
-      <p class="hint">Don't have an account? <a href="/register">Register</a></p>
-    </form>
+<body class="login-body" style="margin:0; padding:0;">
+  <div style="width:100vw; height:100vh; position:fixed; top:0; left:0; z-index:0;">
+    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80" alt="food background" style="width:100vw; height:100vh; object-fit:cover; filter:brightness(0.7);">
+    <div style="position:absolute; top:0; left:0; width:100vw; height:100vh; background:rgba(255,255,255,0.05);"></div>
   </div>
-</div>
-
+  <div style="position:relative; z-index:1;">
+    <div class="login-container" style="display:flex; justify-content:center; align-items:center; min-height:100vh;">
+      <div class="login-card" style="background:rgba(255,255,255,0.95); border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.15); padding:32px 36px; min-width:320px; max-width:350px;">
+        <div class="login-header" style="text-align:center;">
+          <i class="fas fa-utensils" style="font-size:2rem; color:#ff6347;"></i>
+          <h1 style="margin:12px 0 4px; font-size:2rem; color:#ff6347;">Foodmate</h1>
+          <p style="margin-bottom:18px; color:#333;">Share your reviews & discover food</p>
+        </div>
+        <form method="POST">
+          <input type="text" name="username" placeholder="Enter Username" required style="width:100%; margin-bottom:12px; padding:8px 10px; border-radius:6px; border:1px solid #ccc;">
+          <input type="password" name="password" placeholder="Enter Password" required style="width:100%; margin-bottom:16px; padding:8px 10px; border-radius:6px; border:1px solid #ccc;">
+          <button type="submit" style="width:100%; background:#ff6347; color:#fff; border:none; border-radius:6px; padding:10px 0; font-weight:600; margin-bottom:10px;">Login</button>
+          <p class="hint" style="text-align:center; margin-top:8px;">Don't have an account? <a href="/register" style="color:#ff6347; text-decoration:underline;">Register</a></p>
+        </form>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
