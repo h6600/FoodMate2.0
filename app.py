@@ -139,13 +139,17 @@ def upload():
         file = request.files['image']
         user = session['user']
 
-
         # Read and encode image
         if file:
             image_data = base64.b64encode(file.read()).decode('utf-8')
         else:
             image_data = ""
-        prediction = predict_food_tag(image_data)
+
+        # Get predicted_tag from UI, fallback to model if empty
+        predicted_tag = request.form.get('predicted_tag', '').strip()
+        if not predicted_tag:
+            predicted_tag = predict_food_tag(image_data)
+
         # Location
         restaurant = {
            "name": request.form.get("restaurant_name"),
@@ -163,7 +167,7 @@ def upload():
             "likes": [],
             "comments": [],
             "restaurant": restaurant,
-            "predicted_tag": prediction
+            "predicted_tag": predicted_tag
         }
 
         posts.insert_one(post_data)
@@ -627,6 +631,14 @@ def feed():
         current_view=view
     )
 
+@app.route('/predict_tag', methods=['POST'])
+def predict_tag():
+    data = request.get_json()
+    image_base64 = data.get('image_base64')
+    if not image_base64:
+        return jsonify({'error': 'No image provided'}), 400
+    tag = predict_food_tag(image_base64)
+    return jsonify({'predicted_tag': tag})
 
 if __name__ == '__main__':
     app.run(debug=True)

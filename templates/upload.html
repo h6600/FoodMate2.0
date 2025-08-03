@@ -39,11 +39,7 @@
       <form class="upload-form" method="POST" enctype="multipart/form-data">
         <label>Choose Image:</label>
         <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required>
-        <!-- <h4>📍 Select Location (Where you ate this?)</h4>
-        <div id="map" style="height: 300px; border-radius: 10px; margin-bottom: 15px;"></div>
-
-        <input type="hidden" id="latitude" name="latitude">
-        <input type="hidden" id="longitude" name="longitude"> -->
+        <input type="hidden" name="predicted_tag" id="predictedTagInput">
         <label for="restaurantSearch">Restaurant Location</label>
         <input type="text" id="restaurantSearch" placeholder="Type restaurant or location" class="form-control">
 
@@ -68,7 +64,10 @@
           <img id="preview-img" src="https://cdn-icons-png.flaticon.com/512/2922/2922506.png" alt="Preview">
           <div class="post-content">
             <h4 id="preview-text">Your review will appear here</h4>
-            <p class="tag">🍴 predicted_tag</p>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span>🍴</span>
+              <input type="text" id="predictedTagEdit" value="" style="border: none; background: transparent; font-size: 1em; width: 120px;" oninput="updateTagInput()">
+            </div>
             <p class="meta"><i class="fas fa-heart"></i> 0 &nbsp; <i class="fas fa-comment"></i> 0</p>
           </div>
         </div>
@@ -81,10 +80,36 @@
   function previewImage(event) {
     const output = document.getElementById('preview-img');
     output.src = URL.createObjectURL(event.target.files[0]);
+    // Read file as base64 and send to /predict_tag
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        // Remove data:image/... prefix if present
+        let base64 = e.target.result;
+        if (base64.indexOf(',') !== -1) base64 = base64.split(',')[1];
+        fetch('/predict_tag', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image_base64: base64 })
+        })
+        .then(res => res.json())
+        .then(data => {
+          const tag = data.predicted_tag || '';
+          document.getElementById('predictedTagEdit').value = tag;
+          document.getElementById('predictedTagInput').value = tag;
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   }
   function previewReview(event) {
     const text = document.getElementById('preview-text');
     text.textContent = event.target.value || "Your review will appear here";
+  }
+  function updateTagInput() {
+    const tag = document.getElementById('predictedTagEdit').value;
+    document.getElementById('predictedTagInput').value = tag;
   }
 </script>
 <!-- Leaflet Core JS -->
