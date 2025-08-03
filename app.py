@@ -442,38 +442,38 @@ def restaurant_dashboard():
             if comment_sentiment in ['positive', 'neutral', 'negative']:
                 sentiment_counts[comment_sentiment.capitalize()] += 1
 
-    # Prepare model input
-    if model:
-        df = pd.DataFrame([{
-            'likes': len(p.get('likes', [])),
-            'dislikes': len(p.get('dislikes', [])),
-            'comments': len(p.get('comments', [])),
-            'positive_comments': sum(1 for c in p.get('comments', []) if c.get('sentiment') == 'positive'),
-            'neutral_comments': sum(1 for c in p.get('comments', []) if c.get('sentiment') == 'neutral'),
-            'negative_comments': sum(1 for c in p.get('comments', []) if c.get('sentiment') == 'negative'),
-            'review_positive': 1 if p.get('review_sentiment') == 'positive' else 0,
-            'review_neutral': 1 if p.get('review_sentiment') == 'neutral' else 0,
-            'review_negative': 1 if p.get('review_sentiment') == 'negative' else 0,
-            'tag': p.get('predicted_tag', 'unknown')
-        } for p in restaurant_posts])
+    # Ensure all sentiment counts are integers
+    review_pos, review_neu, review_neg = compute_sentiment_distribution_from_posts(restaurant_posts)
+    # Calculate restaurant quality score
+    restaurant_score = predict_quality_score(restaurant_name);  
 
-        if not df.empty:
-            # One-hot encode tags if needed
-            df_encoded = pd.get_dummies(df)
-            # Align with model's expected columns
-            model_cols = getattr(model, 'feature_names_in_', df_encoded.columns)
-            for col in model_cols:
-                if col not in df_encoded:
-                    df_encoded[col] = 0
-            df_encoded = df_encoded[list(model_cols)]
+    ## third chart logic
+    user_lat = current_user['location']['lat']
+    user_lon = current_user['location']['lng']
 
-            prediction = model.predict(df_encoded)
-            restaurant_score = round(prediction.mean(), 2)  # Average score of all posts
-        else:
-            restaurant_score = None
-    else:
-        restaurant_score = None
+    # Get nearby restaurants within 10km
+    all_nearby = get_nearby_restaurants(user_lat, user_lon)  # each item: {'name': ..., 'lat': ..., 'lon': ...}
+   
+    # Calculate predicted quality score for each
+    scored_restaurants = []
+    for r in all_nearby:
+        score = predict_quality_score(r['name'])
+        scored_restaurants.append({
+            'name': r['name'],
+            'score': score
+        })
 
+    print(scored_restaurants)
+    # Sort and pick top 5
+    top5 = sorted(scored_restaurants, key=lambda x: x['score'], reverse=True)[:5]
+
+    labels = [r['name'] for r in top5]
+    scores = [r['score'] for r in top5]
+    stars = ['★' * round(s) + '☆' * (5 - round(s)) for s in scores]
+    print(labels)
+    print(scores)
+    print(stars)
+    
     return render_template(
         'restaurant_dashboard.html',
         user=current_user,
@@ -482,10 +482,89 @@ def restaurant_dashboard():
         total_likes=total_likes,
         total_dislikes=total_dislikes,
         total_comments=total_comments,
-        sentiment_counts=sentiment_counts,
-        restaurant_score=restaurant_score
+        restaurant_score=restaurant_score,
+        review_pos=review_pos,
+        review_neu=review_neu,
+        review_neg=review_neg,
+        top_labels=labels,
+        top_scores=scores,
+        top_stars=stars
     )
 
+## to map restaurant score
+def predict_quality_score(restaurant_name):
+    import joblib
+    import pandas as pd
+
+    try:
+        model = joblib.load("restaurant_quality_model.pkl")
+        df = pd.read_csv("restaurant_features.csv")
+        restaurant_data = df[df["restaurant"] == restaurant_name]
+
+        if restaurant_data.empty:
+            print("No data for:", restaurant_name)
+            return None
+
+        features = restaurant_data.drop(columns=["restaurant", "quality_score"])
+        return round(model.predict(features)[0], 2)
+
+    except Exception as e:
+        print("Prediction error:", e)
+        return None
+
+def compute_sentiment_distribution_from_posts(posts):
+    total_positive = 0
+    total_neutral = 0
+    total_negative = 0
+    total_sentiments = 0
+
+    for post in posts:
+        # Review sentiment
+        review_sentiment = post.get('review_sentiment', '').strip().lower()
+        if review_sentiment in ['positive', 'neutral', 'negative']:
+            total_sentiments += 1
+            if review_sentiment == 'positive':
+                total_positive += 1
+            elif review_sentiment == 'neutral':
+                total_neutral += 1
+            elif review_sentiment == 'negative':
+                total_negative += 1
+
+        # Comments sentiments
+        for comment in post.get('comments', []):
+            comment_sentiment = comment.get('sentiment', '').strip().lower()
+            if comment_sentiment in ['positive', 'neutral', 'negative']:
+                total_sentiments += 1
+                if comment_sentiment == 'positive':
+                    total_positive += 1
+                elif comment_sentiment == 'neutral':
+                    total_neutral += 1
+                elif comment_sentiment == 'negative':
+                    total_negative += 1
+
+    # Avoid division by zero
+    if total_sentiments == 0:
+        return 0, 0, 0
+
+    review_pos = total_positive / total_sentiments
+    review_neu = total_neutral / total_sentiments
+    review_neg = total_negative / total_sentiments
+
+    return review_pos, review_neu, review_neg
+
+## to get nearby restaurants based on user's location
+def get_nearby_restaurants(user_lat, user_lon, radius_km=10):
+    all_restaurants = list(users.find({"role": "owner"}))  # adjust collection
+    nearby = []
+    for rest in all_restaurants:
+        loc = rest.get('location', {})
+        if 'lat' in loc and 'lng' in loc:
+            dist = haversine(user_lat, user_lon, loc['lat'], loc['lng'])
+            if dist <= radius_km:
+                nearby.append({
+                    'name': loc['name'],
+                })
+    return nearby
 
 if __name__ == '__main__':
     app.run(debug=True)

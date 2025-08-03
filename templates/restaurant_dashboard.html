@@ -2,138 +2,294 @@
 {% block content %}
 
 <div class="layout-container">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="brand">
-      <i class="fas fa-utensils"></i>
-      <h1>Foodmate</h1>
-    </div>
-    <ul class="nav-links">
-      <li class="active"><a href="/restaurant_dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
-      <li><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
-      <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-    </ul>
-  </aside>
-
-  <main class="dashboard-main">
-    <h2>Welcome, {{ session['user'] }}</h2>
-
-    <!-- Restaurant Info -->
-    <div class="card highlight-card">
-      <h3>Restaurant: {{ restaurant_name }}</h3>
-    </div>
-
-    <!-- Summary cards -->
-    <div class="summary-container">
-      <div class="summary-card">
-        <h4>Total Posts</h4>
-        <p>{{ total_posts }}</p>
-      </div>
-      <div class="summary-card">
-        <h4>Total Likes</h4>
-        <p>{{ total_likes }}</p>
-      </div>
-      <div class="summary-card">
-        <h4>Total Comments</h4>
-        <p>{{ total_comments }}</p>
-      </div>
-    </div>
-
-    <!-- Quality Score -->
-    <div class="card">
-      <h3>Quality Score</h3>
-      {% if restaurant_score %}
-        <div class="score-stars">
-          {% set score = restaurant_score | round(0, 'floor') %}
-          {% for i in range(1, 6) %}
-            {% if i <= score %}
-              <span style="color: gold;">★</span>
-            {% else %}
-              <span style="color: lightgray;">★</span>
-            {% endif %}
-          {% endfor %}
-          <strong style="margin-left: 10px;">{{ restaurant_score }} / 5</strong>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <i class="fas fa-utensils"></i>
+            <h1>Foodmate</h1>
         </div>
-      {% else %}
-        <p>No data available to compute score.</p>
-      {% endif %}
-    </div>
+        <ul class="nav-links">
+            <li class="active"><a href="/restaurant_dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+            <li><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
+            <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </aside>
 
-    <!-- Sentiment Chart -->
-    <div class="card">
-      <h3>Customer Sentiment</h3>
-      <canvas id="sentimentChart" height="100"></canvas>
-    </div>
-  </main>
+    <main class="dashboard-main">
+        <h2>Welcome, {{ session['user'] }}</h2>
+
+        <!-- Restaurant Info -->
+        <div class="card highlight-card">
+            <h3>Restaurant: {{ restaurant_name }}</h3>
+        </div>
+
+        <!-- Summary cards -->
+        <div class="summary-container">
+            <div class="summary-card">
+                <h4>Total Posts</h4>
+                <p>{{ total_posts }}</p>
+            </div>
+            <div class="summary-card">
+                <h4>Total Likes</h4>
+                <p>{{ total_likes }}</p>
+            </div>
+            <div class="summary-card">
+                <h4>Total Dislikes</h4>
+                <p>{{ total_dislikes }}</p>
+            </div>
+            <div class="summary-card">
+                <h4>Total Comments</h4>
+                <p>{{ total_comments }}</p>
+            </div>
+
+        </div>
+
+        <!-- Quality Score -->
+        <div class="card">
+            <h3>Quality Score</h3>
+            {% if restaurant_score %}
+            <div class="score-stars">
+                {% set score = restaurant_score | round(0, 'floor') %}
+                {% for i in range(1, 6) %}
+                {% if i <= score %} <span style="color: gold;">★</span>
+                    {% else %}
+                    <span style="color: lightgray;">★</span>
+                    {% endif %}
+                    {% endfor %}
+                    <strong style="margin-left: 10px;">{{ restaurant_score }} / 5</strong>
+            </div>
+            {% else %}
+            <p>No data available to compute score.</p>
+            {% endif %}
+        </div>
+
+        <!-- Sentiment Chart -->
+        <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="card" style="flex: 1;">
+                <h3>Customer Sentiment</h3>
+                <canvas id="sentimentChart" style="max-width:500px;max-height:200px;"></canvas>
+                <input type="hidden" id="review_pos" value="{{ review_pos }}">
+                <input type="hidden" id="review_neu" value="{{ review_neu }}">
+                <input type="hidden" id="review_neg" value="{{ review_neg }}">
+            </div>
+            <div class="card" style="flex: 1;">
+                <h3 class="text-xl font-bold mt-6 mb-2">👍 Likes vs 👎 Dislikes vs 💬 Comments</h3>
+                <canvas id="likesCommentsChart" width="400" height="200"></canvas>
+                <input type="hidden" id="total_likes" value="{{ total_likes }}">
+                <input type="hidden" id="total_dislikes" value="{{ total_dislikes }}">
+                <input type="hidden" id="total_comments" value="{{ total_comments }}">
+            </div>
+        </div>
+        <div class="card">
+            <h3 class="text-xl font-bold mt-6 mb-2">📌 Near by Restaurants rating</h3>
+            <canvas id="topRestaurantsChart" width="1000" height="200" style="max-width:1000px;max-height:200px;"></canvas>
+            <input type="hidden" id="top_labels" value='{{ top_labels | tojson | safe }}'>
+            <input type="hidden" id="top_scores" value='{{ top_scores | tojson | safe }}'>
+            <input type="hidden" id="top_stars" value='{{ top_stars | tojson | safe }}'>
+        </div>
+    </main>
 </div>
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  const ctx = document.getElementById('sentimentChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Positive', 'Neutral', 'Negative'],
-      datasets: [{
-        label: 'Sentiment',
-        data: [
-           sentiment_counts['Positive'] || 0,
-           sentiment_counts['Neutral'] || 0,
-           sentiment_counts['Negative'] || 0
-        ],
-        backgroundColor: ['#4caf50', '#ffca28', '#f44336'],
-        borderRadius: 6,
-        barThickness: 40
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: { beginAtZero: true }
-      },
-      plugins: {
-        legend: { display: false }
-      }
-    }
-  });
+    const ctx1 = document.getElementById('sentimentChart');
+    const review_pos = document.getElementById('review_pos').value;
+    const review_neu = document.getElementById('review_neu').value;
+    const review_neg = document.getElementById('review_neg').value;
+    new Chart(ctx1, {
+        type: 'pie',
+        data: {
+            labels: ['Positive', 'Neutral', 'Negative'],
+            datasets: [{
+                label: 'Review Sentiments',
+                data: [review_pos, review_neu, review_neg],
+                backgroundColor: ['#4ade80', '#facc15', '#f87171'],
+                borderWidth: 1
+            }]
+        }
+    });
 </script>
+<script>
+    const ctx = document.getElementById('likesCommentsChart');
+    const total_likes = document.getElementById('total_likes').value;
+    const total_dislikes = document.getElementById('total_dislikes').value;
+    const total_comments = document.getElementById('total_comments').value;
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Total Likes', 'Total Dislikes', 'Total Comments'],
+            datasets: [{
+                label: 'Engagement',
+                data: [total_likes, total_dislikes, total_comments],
+                backgroundColor: ['green', 'red', '#60a5fa'],
+                barThickness: 20
+            }]
+        },
+        options: {
+            responsive: false,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+            },
+            scales: {
+                x: {
+                    ticks: { font: { size: 10 } }
+                },
+                y: {
+                    ticks: { font: { size: 10 } },
+                    beginAtZero: true,
+                    max: 15
+                }
+            }
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx2 = document.getElementById('topRestaurantsChart').getContext('2d');
+        // Parse and clean labels to remove brackets and quotes
+        let rawLabels = document.getElementById('top_labels').value;
+        let labels = [];
+        try {
+            labels = JSON.parse(rawLabels);
+        } catch (e) {
+            labels = rawLabels.split(',');
+        }
+        labels = labels.map(l => l.replace(/^[\[\"]+|[\]\"]+$/g, '').trim());
+        const scores = JSON.parse(document.getElementById('top_scores').value);
+        const starRatings = JSON.parse(document.getElementById('top_stars').value);
+
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Quality Score',
+                    data: scores,
+                    backgroundColor: '#4CAF50',
+                    borderRadius: 10,
+                    borderSkipped: false,
+                    barThickness: 20
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                return `Score: ${ctx.raw} (${starRatings[ctx.dataIndex]})`;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'end',
+                        formatter: function (value, context) {
+                            // Only show yellow stars on the bar
+                            const stars = starRatings[context.dataIndex];
+                            // Unicode yellow star
+                            return stars.replace(/★/g, '⭐');
+                        },
+                        font: {
+                            weight: 'bold',
+                            size: 18
+                        },
+                        color: 'gold',
+                        display: true
+                    },
+                    title: {
+                        display: true,
+                        text: 'Top 5 Nearby Restaurants by Quality Score',
+                        font: {
+                            size: 18
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        min: 0,
+                        max: 5.5,
+                        ticks: {
+                            stepSize: 1
+                        },
+                        title: {
+                            display: true,
+                            text: 'Predicted Quality Score'
+                        },
+                        padding: 60
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Restaurant'
+                        },
+                        ticks: {
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    });
+</script>
+
+
+
 
 <!-- Styling -->
 <style>
-  .dashboard-main {
-    padding: 2rem;
-    background: #f0f2f5;
-    flex: 1;
-  }
-  .card {
-    background: white;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  }
-  .highlight-card {
-    background: #e1f5fe;
-    color: #0277bd;
-  }
-  .summary-container {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-  .summary-card {
-    flex: 1;
-    background: #fffde7;
-    border-left: 6px solid #ffeb3b;
-    padding: 1rem;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-  }
-  .score-stars {
-    font-size: 1.5rem;
-  }
+    .dashboard-main {
+        padding: 2rem;
+        background: #f0f2f5;
+        flex: 1;
+    }
+
+    .card {
+        background: white;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .highlight-card {
+        background: #e1f5fe;
+        color: #0277bd;
+    }
+
+    .summary-container {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .summary-card {
+        flex: 1;
+        background: #fffde7;
+        border-left: 6px solid #ffeb3b;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .score-stars {
+        font-size: 1.5rem;
+    }
 </style>
 
 {% endblock %}
