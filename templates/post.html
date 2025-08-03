@@ -1,9 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD33LjxMBS6CpJdvFWzDCBSWiE3ZGbPGJU&libraries=places"></script>
+
 <div class="layout-container">
   <!-- Sidebar -->
   <div class="sidebar-post">
@@ -66,12 +64,10 @@
 
         <!-- Review -->
         <div class="post-caption">
-          <p><strong>{{ post.username }}</strong> </p>
-          {% if post.location and post.location.latitude and post.location.longitude %}
-          <h4>📍 Location</h4>
-          <div id="postMap" style="height: 300px; border-radius: 10px; margin-bottom: 20px;"></div>
+          {% if post.restaurant and post.restaurant.lat and post.restaurant.lng %}
+          <h4>📍Restaurant Name : <strong id="restaurant">{{ post.restaurant.name }}</strong></h4>
           {% endif %}
-          <p>{{ post.review }}</p>
+          <p><span style="color: orangered;">Review: </span> {{ post.review }}</p>
         </div>
 
         <!-- Comment Form -->
@@ -102,43 +98,4 @@
     </div>
   </main>
 </div>
-<script>
-  function likePost(event) {
-    event.preventDefault();
-    const postId = document.getElementById('post_id').value;
-    fetch('/like_post/' + postId, { method: 'POST' })
-      .then(response => response.json())
-      .then(data => {
-        const likeBtn = document.getElementById('like-btn');
-        const count = document.getElementById('like-count');
-        if (data.status === 'liked') {
-          likeBtn.textContent = '❤️';
-          count.textContent = parseInt(count.textContent) + 1;
-        } else if (data.status === 'unliked') {
-          likeBtn.textContent = '🤍';
-          count.textContent = parseInt(count.textContent) - 1;
-        }
-      });
-  }
-</script>
-{% if post.location and post.location.latitude and post.location.longitude %}
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var postMapDiv = document.getElementById('postMap');
-    if (postMapDiv) {
-      const lat = parseFloat('{{ post.location.latitude }}');
-      const lng = parseFloat('{{ post.location.longitude }}');
-      const map = L.map('postMap').setView([lat, lng], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
-
-      L.marker([lat, lng]).addTo(map)
-        .bindPopup("This is where the food was eaten.")
-        .openPopup();
-    }
-  });
-</script>
-{% endif %}
-
 {% endblock %}

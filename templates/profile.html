@@ -90,6 +90,9 @@
             <img src="data:image/jpeg;base64,{{ post.image_base64 }}" alt="Post Image" />
             <div class="grid-post-text">
               <strong>{{ post.review }}</strong>
+              {% if post.restaurant and post.restaurant.lat and post.restaurant.lng %}
+              <h4>📍Restaurant Name : <strong id="restaurant">{{ post.restaurant.name }}</strong></h4>
+              {% endif %}
               <p>🍴 {{ post.predicted_tag }}</p>
               {% if not post.promoted %}
               {% if is_owner %}

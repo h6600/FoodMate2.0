@@ -48,6 +48,9 @@
           <div class="post-info">
             <h4 class="post-title">{{ post.review }}</h4>
             <p class="tag">🍴 {{ post.predicted_tag }}</p>
+            {% if post.restaurant and post.restaurant.lat and post.restaurant.lng %}
+              <h4>📍Restaurant Name : <strong id="restaurant">{{ post.restaurant.name }}</strong></h4>
+            {% endif %}
             {% if post.promoted %}
             <span class="promoted-label">⭐ Promoted Post</span>
             {% endif %}
