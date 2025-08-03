@@ -263,11 +263,23 @@ def profile():
         # Fetch all posts tagged with this restaurant
         location = user.get('location').get('name')
         restaurant_posts = list(posts.find({'restaurant.name': location}).sort('_id', -1))
-        return render_template('profile.html', user=user, posts=restaurant_posts, is_owner=True)
+        total_posts = len(restaurant_posts)
+        total_likes = sum(len(post.get('likes', [])) for post in restaurant_posts)
+        total_comments = sum(len(post.get('comments', [])) for post in restaurant_posts)
+        total_dislikes = sum(len(post.get('dislikes', [])) for post in restaurant_posts)
+        return render_template('profile.html', user=user, posts=restaurant_posts, is_owner=True,
+                              total_posts=total_posts, total_likes=total_likes,
+                              total_comments=total_comments, total_dislikes=total_dislikes)
     else:
         # Normal user – show their own posts
         user_posts = list(posts.find({'username': session['user']}).sort('_id', -1))
-        return render_template('profile.html', user=user, posts=user_posts, is_owner=False)
+        total_posts = len(user_posts)
+        total_likes = sum(len(post.get('likes', [])) for post in user_posts)
+        total_comments = sum(len(post.get('comments', [])) for post in user_posts)
+        total_dislikes = sum(len(post.get('dislikes', [])) for post in user_posts)
+        return render_template('profile.html', user=user, posts=user_posts, is_owner=False,
+                              total_posts=total_posts, total_likes=total_likes,
+                              total_comments=total_comments, total_dislikes=total_dislikes)
 
 @app.route('/edit_profile', methods=['POST'])
 def edit_profile():

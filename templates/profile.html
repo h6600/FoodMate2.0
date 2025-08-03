@@ -37,8 +37,9 @@
         <h2>{{ user.firstname }} {{ user.lastname }}</h2>
         <p class="bio">{{ user.bio or "Food enthusiast exploring flavors 🍹🍕" }}</p>
         <div class="stats">
-          <a href="#">📸 {{ post_count }} Posts</a>
-          <a href="#">❤️ {{ total_likes }} Likes</a>
+          <a href="#">📸 {{ total_posts }} Posts</a>
+          <a href="#">👍 {{ total_likes }} Likes</a>
+          <a href="#">👎 {{ total_dislikes }} Dislikes</a>
           <a href="#">💬 {{ total_comments }} Comments</a>
         </div>
       </div>
