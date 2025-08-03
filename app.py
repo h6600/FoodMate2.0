@@ -173,32 +173,6 @@ def upload():
     return render_template('upload.html')
 
 
-# @app.route('/feed')
-# def feed():
-#     view = request.args.get('view', 'scroll')  # default to 'scroll'
-#     page = int(request.args.get('page', 1))
-
-#     user_map = {
-#         user['username']: user.get('profile_pic')
-#         for user in users.find({}, {'username': 1, 'profile_pic': 1})
-#     }
-#     posts_per_page = 8 if view == 'grid' else 6
-#     total_posts = posts.count_documents({})
-#     total_pages = math.ceil(total_posts / posts_per_page)
-#     skip = (page - 1) * posts_per_page
-#     paginated_posts = list(posts.find().sort('_id', -1).skip(skip).limit(posts_per_page))
-#     for post in paginated_posts:
-#         post['profile_pic'] = user_map.get(post.get('username'))
-#     return render_template(
-#         'feed.html',
-#         all_posts=paginated_posts,
-#         current_page=page,
-#         total_pages=total_pages,
-#         current_view=view
-#     )
-
-
-
 @app.route('/post/<post_id>')
 def view_post(post_id):
     post = posts.find_one({'_id': ObjectId(post_id)})
@@ -353,52 +327,52 @@ def haversine(lat1, lon1, lat2, lon2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     return R * c
 
-@app.route('/feed')
-def feed():
-    view = request.args.get('view', 'scroll')  # default to 'scroll'
-    page = int(request.args.get('page', 1))
+# @app.route('/feed')
+# def feed():
+#     view = request.args.get('view', 'scroll')  # default to 'scroll'
+#     page = int(request.args.get('page', 1))
 
-    lat = request.args.get('lat', type=float)
-    lng = request.args.get('lng', type=float)
+#     lat = request.args.get('lat', type=float)
+#     lng = request.args.get('lng', type=float)
 
-    user_map = {
-        user['username']: user.get('profile_pic')
-        for user in users.find({}, {'username': 1, 'profile_pic': 1})
-    }
+#     user_map = {
+#         user['username']: user.get('profile_pic')
+#         for user in users.find({}, {'username': 1, 'profile_pic': 1})
+#     }
 
-    # Pagination settings
-    posts_per_page = 8 if view == 'grid' else 6
-    skip = (page - 1) * posts_per_page
+#     # Pagination settings
+#     posts_per_page = 8 if view == 'grid' else 6
+#     skip = (page - 1) * posts_per_page
 
-    # Base query
-    all_posts = list(posts.find().sort('_id', -1))
+#     # Base query
+#     all_posts = list(posts.find().sort('_id', -1))
 
-    # Filter by location if lat/lng provided
-    if lat and lng:
-        filtered_posts = []
-        for post in all_posts:
-            loc = post.get('restaurant', {})
-            if loc.get('lat') and loc.get('lng'):
-                distance = haversine(lat, lng, loc['lat'], loc['lng'])
-                if distance <= 10:
-                    post['distance'] = round(distance, 1)
-                    filtered_posts.append(post)
-        all_posts = filtered_posts
+#     # Filter by location if lat/lng provided
+#     if lat and lng:
+#         filtered_posts = []
+#         for post in all_posts:
+#             loc = post.get('restaurant', {})
+#             if loc.get('lat') and loc.get('lng'):
+#                 distance = haversine(lat, lng, loc['lat'], loc['lng'])
+#                 if distance <= 10:
+#                     post['distance'] = round(distance, 1)
+#                     filtered_posts.append(post)
+#         all_posts = filtered_posts
 
-    total_posts = len(all_posts)
-    total_pages = math.ceil(total_posts / posts_per_page)
-    paginated_posts = all_posts[skip:skip + posts_per_page]
+#     total_posts = len(all_posts)
+#     total_pages = math.ceil(total_posts / posts_per_page)
+#     paginated_posts = all_posts[skip:skip + posts_per_page]
 
-    for post in paginated_posts:
-        post['profile_pic'] = user_map.get(post.get('username'))
+#     for post in paginated_posts:
+#         post['profile_pic'] = user_map.get(post.get('username'))
 
-    return render_template(
-        'feed.html',
-        all_posts=paginated_posts,
-        current_page=page,
-        total_pages=total_pages,
-        current_view=view
-    )
+#     return render_template(
+#         'feed.html',
+#         all_posts=paginated_posts,
+#         current_page=page,
+#         total_pages=total_pages,
+#         current_view=view
+#     )
 
 @app.route('/promote/<post_id>', methods=['POST'])
 def promote_post(post_id):
@@ -506,7 +480,7 @@ def predict_quality_score(restaurant_name):
             return None
 
         features = restaurant_data.drop(columns=["restaurant", "quality_score"])
-        return round(model.predict(features)[0], 2)
+        return round(restaurant_data["quality_score"].values[0], 2)
 
     except Exception as e:
         print("Prediction error:", e)
@@ -565,6 +539,82 @@ def get_nearby_restaurants(user_lat, user_lon, radius_km=10):
                     'name': loc['name'],
                 })
     return nearby
+
+@app.route('/feed')
+def feed():
+    view = request.args.get('view', 'scroll')  # default to 'scroll'
+    page = int(request.args.get('page', 1))
+
+    lat = request.args.get('lat', type=float)
+    lng = request.args.get('lng', type=float)
+
+    user_map = {
+        user['username']: user.get('profile_pic')
+        for user in users.find({}, {'username': 1, 'profile_pic': 1})
+    }
+
+    # Pagination settings
+    posts_per_page = 8 if view == 'grid' else 6
+    skip = (page - 1) * posts_per_page
+
+    # Get all posts from DB
+    all_posts = list(posts.find())
+
+    # Filter by location if lat/lng provided
+    if lat and lng:
+        filtered_posts = []
+        for post in all_posts:
+            loc = post.get('restaurant', {})
+            if loc.get('lat') and loc.get('lng'):
+                distance = haversine(lat, lng, loc['lat'], loc['lng'])
+                if distance <= 10:
+                    post['distance'] = round(distance, 1)
+                    filtered_posts.append(post)
+        all_posts = filtered_posts
+
+    # Compute popularity score for each post
+    for post in all_posts:
+        # Ensure likes is always an integer (handle list or int)
+        likes = post.get('likes', 0)
+        if isinstance(likes, list):
+            likes = len(likes)
+        elif not isinstance(likes, int):
+            try:
+                likes = int(likes)
+            except Exception:
+                likes = 0
+
+        # Ensure comments is always a list
+        comments = post.get('comments', [])
+        if not isinstance(comments, list):
+            comments = []
+        num_comments = len(comments)
+
+        sentiment = post.get('sentiment_score', 0)  # default neutral if not present
+
+        # Weighted popularity score
+        post['popularity_score'] = (likes * 2) + num_comments + (sentiment * 10)
+
+    # Sort posts by popularity score (descending)
+    all_posts.sort(key=lambda x: x.get('popularity_score', 0), reverse=True)
+
+    # Pagination
+    total_posts = len(all_posts)
+    total_pages = math.ceil(total_posts / posts_per_page)
+    paginated_posts = all_posts[skip:skip + posts_per_page]
+
+    # Attach profile picture
+    for post in paginated_posts:
+        post['profile_pic'] = user_map.get(post.get('username'))
+
+    return render_template(
+        'feed.html',
+        all_posts=paginated_posts,
+        current_page=page,
+        total_pages=total_pages,
+        current_view=view
+    )
+
 
 if __name__ == '__main__':
     app.run(debug=True)
