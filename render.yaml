@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: foodmate
+    env: python
+    buildCommand: "pip install -r requirements.txt && python restaurant_rating_model.py && python sentiment_model.py && python train_model_with_graphs.py"
+    startCommand: "gunicorn app:app"
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: MONGO_URI
+        value: "mongodb+srv://mongodbconnect43:mongoDB%40123@mongodemo.wndvpbd.mongodb.net/"
+    autoDeploy: true
+    plan: free
+    region: oregon
+    pythonVersion: 3.10
+    # If you use a .env file, uncomment below
+    # envFilePath: .env
+    # If you need static files served, add below
+    # staticPublishPath: static

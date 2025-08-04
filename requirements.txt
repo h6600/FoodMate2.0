@@ -8,3 +8,11 @@ torchvision==0.16.0
 numpy==1.26.4
 scikit-learn==1.3.0
 matplotlib==3.7.4
+gunicorn
+bcrypt==4.0.1
+pandas==2.1.4
+joblib==1.3.2
+werkzeug==2.3.7
+bson==0.5.10
+# base64, os, math, datetime, collections, io, pickle are part of Python stdlib, no need to install
+# AOS is a frontend library, included via CDN in HTML
