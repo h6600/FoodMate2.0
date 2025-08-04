@@ -32,7 +32,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/')
 def default():
-    return redirect('/login')
+    return redirect('/foodMate')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -124,7 +124,7 @@ def dashboard():
 @app.route('/logout')
 def logout():
     session.pop('user', None)
-    return redirect('/login')
+    return redirect('/')
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():

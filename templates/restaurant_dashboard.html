@@ -160,7 +160,11 @@
         } catch (e) {
             labels = rawLabels.split(',');
         }
-        labels = labels.map(l => l.replace(/^[\[\"]+|[\]\"]+$/g, '').trim());
+        // Trim long restaurant names for chart display
+        labels = labels.map(l => {
+            l = l.replace(/^[\[\"]+|[\]\"]+$/g, '').trim();
+            return l.length > 17 ? l.slice(0, 14) + '...' : l;
+        });
         const scores = JSON.parse(document.getElementById('top_scores').value);
         const starRatings = JSON.parse(document.getElementById('top_stars').value);
 
@@ -201,7 +205,7 @@
                         },
                         font: {
                             weight: 'bold',
-                            size: 18
+                            size: 14
                         },
                         color: 'gold',
                         display: true
@@ -218,6 +222,7 @@
                     x: {
                         min: 0,
                         max: 10,
+
                         ticks: {
                             stepSize: 1
                         },
@@ -235,7 +240,7 @@
                         },
                         ticks: {
                             font: {
-                                size: 14,
+                                size: 12,
                                 weight: 'bold'
                             }
                         }
