@@ -16,7 +16,7 @@
     </aside>
 
     <main class="dashboard-main">
-        <h2>Welcome, {{ session['user'] }}</h2>
+        <h1 class="textColur-orange">Welcome, {{ session['user'] }}</h2>
 
         <!-- Restaurant Info -->
         <div class="card highlight-card">
@@ -46,7 +46,7 @@
 
         <!-- Quality Score -->
         <div class="card">
-            <h3>Quality Score</h3>
+            <h3 class="textColur-orange">Quality Score</h3>
             {% if restaurant_score %}
             <div class="score-stars">
                 {% set score = restaurant_score | round(0, 'floor') %}
@@ -66,14 +66,14 @@
         <!-- Sentiment Chart -->
         <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem;">
             <div class="card" style="flex: 1;">
-                <h3>Customer Sentiment</h3>
+                <h3 class="textColur-orange">Customer Sentiment</h3>
                 <canvas id="sentimentChart" style="max-width:500px;max-height:200px;"></canvas>
                 <input type="hidden" id="review_pos" value="{{ review_pos }}">
                 <input type="hidden" id="review_neu" value="{{ review_neu }}">
                 <input type="hidden" id="review_neg" value="{{ review_neg }}">
             </div>
             <div class="card" style="flex: 1;">
-                <h3 class="text-xl font-bold mt-6 mb-2">👍 Likes vs 👎 Dislikes vs 💬 Comments</h3>
+                <h3 class="text-xl font-bold mt-6 mb-2" style="color: #f4511e;">👍 Likes vs 👎 Dislikes vs 💬 Comments</h3>
                 <canvas id="likesCommentsChart" width="400" height="200"></canvas>
                 <input type="hidden" id="total_likes" value="{{ total_likes }}">
                 <input type="hidden" id="total_dislikes" value="{{ total_dislikes }}">
@@ -81,7 +81,7 @@
             </div>
         </div>
         <div class="card">
-            <h3 class="text-xl font-bold mt-6 mb-2">📌 Near by Restaurants rating</h3>
+            <h3 class="text-xl font-bold mt-6 mb-2" style="color: #f4511e;">📌 Near by Restaurants rating</h3>
             <canvas id="topRestaurantsChart" width="1000" height="200" style="max-width:1000px;max-height:200px;"></canvas>
             <input type="hidden" id="top_labels" value='{{ top_labels | tojson | safe }}'>
             <input type="hidden" id="top_scores" value='{{ top_scores | tojson | safe }}'>
@@ -217,7 +217,7 @@
                 scales: {
                     x: {
                         min: 0,
-                        max: 5.5,
+                        max: 10,
                         ticks: {
                             stepSize: 1
                         },
@@ -267,8 +267,8 @@
     }
 
     .highlight-card {
-        background: #e1f5fe;
-        color: #0277bd;
+        background: #f4511e;
+        color: #ffffff;
     }
 
     .summary-container {
@@ -279,8 +279,8 @@
 
     .summary-card {
         flex: 1;
-        background: #fffde7;
-        border-left: 6px solid #ffeb3b;
+        background: #fce3c6;
+        border-left: 8px solid #f4511e;
         padding: 1rem;
         border-radius: 8px;
         text-align: center;

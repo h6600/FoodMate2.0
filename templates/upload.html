@@ -33,14 +33,14 @@
 
   <!-- Upload Page Main -->
   <main class="dashboard-main">
-    <h2>Upload a New Food Post</h2>
+    <h2 class="textColur-orange">Upload a New Food Post</h2>
     <div class="upload-container">
       <!-- Upload Form -->
       <form class="upload-form" method="POST" enctype="multipart/form-data">
-        <label>Choose Image:</label>
+        <label class="textColur-orange">Choose Image:</label>
         <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required>
         <input type="hidden" name="predicted_tag" id="predictedTagInput">
-        <label for="restaurantSearch">Restaurant Location</label>
+        <label for="restaurantSearch" class="textColur-orange">Restaurant Location</label>
         <input type="text" id="restaurantSearch" placeholder="Type restaurant or location" class="form-control">
 
         <!-- Hidden Fields to store selected values -->
@@ -51,7 +51,7 @@
         <!-- Map Preview -->
         <div id="map" style="height: 300px; margin-top: 10px;"></div>
 
-        <label>Write a short review:</label>
+        <h4 class="textColur-orange" Write a short review:>Write a short review:</h2>
         <textarea name="review" placeholder="Describe the food..." oninput="previewReview(event)" required></textarea>
 
         <button type="submit">Submit Post</button>
@@ -59,16 +59,15 @@
 
       <!-- Live Preview -->
       <div class="upload-preview">
-        <h4>Post Preview</h4>
+        <h4 class="textColur-orange">Post Preview</h4>
         <div class="post-item">
-          <img id="preview-img" src="https://cdn-icons-png.flaticon.com/512/2922/2922506.png" alt="Preview">
+          <img id="preview-img" src="https://cdn-icons-png.flaticon.com/512/562/562678.png" alt="Preview" width="64" height="64">
           <div class="post-content">
-            <h4 id="preview-text">Your review will appear here</h4>
+            <h4 class="textColur-orange" id="preview-text" >Predicted Tag</h4>
             <div style="display: flex; align-items: center; gap: 6px;">
-              <span>🍴</span>
-              <input type="text" id="predictedTagEdit" value="" style="border: none; background: transparent; font-size: 1em; width: 120px;" oninput="updateTagInput()">
+              <span></span>
+              <input type="text" id="predictedTagEdit" value="" style="border: 2px solid rgb(189, 95, 41); background: transparent; font-size: 1em; width: 120px;" oninput="updateTagInput()">
             </div>
-            <p class="meta"><i class="fas fa-heart"></i> 0 &nbsp; <i class="fas fa-comment"></i> 0</p>
           </div>
         </div>
       </div>
@@ -105,7 +104,7 @@
   }
   function previewReview(event) {
     const text = document.getElementById('preview-text');
-    text.textContent = event.target.value || "Your review will appear here";
+    text.textContent = event.target.value || "Predicted Tag";
   }
   function updateTagInput() {
     const tag = document.getElementById('predictedTagEdit').value;

@@ -233,7 +233,7 @@ body {
 .view-toggle .feed-btn {
   padding: 6px 12px;
   margin-left: 10px;
-  background: #ff7043;
+  background: #f4511e;
   color: white;
   border: none;
   border-radius: 6px;
@@ -284,11 +284,15 @@ body {
   border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.1s;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
+  border-color: #ff7043;
+  margin: 10px;
 }
+
+
 
 .feed-post-wrapper:hover {
   transform: scale(1.02);
@@ -773,7 +777,7 @@ body {
 .btn-save {
   margin-top: 12px;
   padding: 8px 16px;
-  background: #333;
+  background: #ff7a59;
   color: white;
   border: none;
   border-radius: 6px;
@@ -824,9 +828,9 @@ body {
   margin-top: 10px;
   margin-bottom: 20px;
   padding: 15px;
-  background-color: #ffd4bf;
+   background: linear-gradient(to bottom right, #ff7043, #f4511e);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgb(255, 255, 255);
 }
 .dashboard-trending h3 {
   margin-bottom: 5px;
@@ -863,7 +867,7 @@ body {
   border-radius: 50%;
   object-fit: cover;
   margin-right: 8px;
-  border: 1px solid #ccc;
+  border: 2px solid #fc6161;
   flex-shrink: 0;
 }
 
@@ -878,8 +882,12 @@ body {
 .username-feed {
   font-weight: bold;
   font-size: 0.95rem;
-  color: black;
+  color: #f4511e;
+  font-weight: bold;
 }
+
+
+
 
 /* Prevent global img styles from interfering */
 img {
@@ -940,4 +948,35 @@ img {
 .reaction-btn:hover {
   transform: scale(1.1);
   color: #ff5722;
+}
+
+
+.heading{
+  font-size: 1.8rem;
+  color: #ff7043;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.sub-heading{
+  font-size: 1.0rem;
+  color:#ff7043;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+
+.textColur {
+  color: #ffffff;
+}
+
+.image{
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.textColur-orange{
+  color: #fc6161;
 }

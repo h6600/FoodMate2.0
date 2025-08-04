@@ -34,39 +34,39 @@
         {% endif %}
       </div>
       <div class="user-details">
-        <h2>{{ user.firstname }} {{ user.lastname }}</h2>
+        <h2 class="textColur-orange">{{ user.firstname }} {{ user.lastname }}</h2>
         <p class="bio">{{ user.bio or "Food enthusiast exploring flavors 🍹🍕" }}</p>
         <div class="stats">
-          <a href="#">📸 {{ total_posts }} Posts</a>
-          <a href="#">👍 {{ total_likes }} Likes</a>
-          <a href="#">👎 {{ total_dislikes }} Dislikes</a>
-          <a href="#">💬 {{ total_comments }} Comments</a>
-        </div>
+  <a href="#">📸 <span >{{ total_posts }}</span> <span class="textColur-orange">Posts</span></a>
+  <a href="#">👍 <span ></span>{{ total_likes }}</span> <span class="textColur-orange">Likes</span></a>
+  <a href="#">👎 <span >{{ total_dislikes }}</span> <span class="textColur-orange">Dislikes</span></a>
+  <a href="#">💬 <span >{{ total_comments }}</span> <span class="textColur-orange">Comments</span></a>
+</div>
       </div>
       <!-- Trigger Button -->
       <button class="btn-edit" onclick="document.getElementById('editModal').style.display='block'">
-        ✏️ Edit Profile
+        Edit Profile
       </button>
 
       <!-- Modal -->
       <div id="editModal" class="modal">
         <div class="modal-content">
           <span class="close" onclick="document.getElementById('editModal').style.display='none'">&times;</span>
-          <h3>Edit Profile</h3>
+          <h3 class="textColur-orange">Edit Profile</h3>
           <form action="{{ url_for('edit_profile') }}" method="POST" enctype="multipart/form-data">
-            <label>First Name</label>
+            <label class="textColur-orange">First Name</label>
             <input type="text" name="firstname" value="{{ user.firstname }}" required>
 
-            <label>Last Name</label>
+            <label class="textColur-orange">Last Name</label>
             <input type="text" name="lastname" value="{{ user.lastname }}" required>
 
-            <label>Email</label>
+            <label class="textColur-orange">Email</label>
             <input type="email" name="email" value="{{ user.email }}" required>
 
-            <label>About</label>
+            <label class="textColur-orange">About</label>
             <textarea name="about">{{ user.about }}</textarea>
 
-            <label>Profile Picture</label>
+            <label class="textColur-orange">Profile Picture</label>
             <input type="file" name="profile_pic" accept="image/*">
 
             <button type="submit" id="editProfileBtn" class="btn-save">Save Changes</button>
@@ -118,7 +118,7 @@
                     <span>{{ post.dislikes|length if post.dislikes }}</span>
                   </button>
                 </form>
-                <i class="fas fa-comment"></i> {{ post.comments|length if post.comments }}
+                <i class="fa-solid fa-comment" style="color: #ff7043;"></i> {{ post.comments|length if post.comments }}
               </div>
               <form method="POST" action="/delete_post/{{ post._id }}"
                 onsubmit="return confirm('Are you sure you want to delete this post?');">

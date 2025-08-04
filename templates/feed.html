@@ -63,7 +63,7 @@
             <h4 class="post-title">{{ post.review }}</h4>
             <p class="tag">🍴 {{ post.predicted_tag }}</p>
             {% if post.restaurant and post.restaurant.lat and post.restaurant.lng %}
-              <h4>📍Restaurant Name : <strong id="restaurant">{{ post.restaurant.name }}</strong></h4>
+              <h4 class="textColur-orange">📍Restaurant Name : <strong id="restaurant">{{ post.restaurant.name }}</strong></h4>
             {% endif %}
             {% if post.promoted %}
             <span class="promoted-label">⭐ Promoted Post</span>
@@ -81,7 +81,7 @@
                   <span>{{ post.dislikes|length if post.dislikes }}</span>
                 </button>
               </form>
-              <i class="fas fa-comment"></i> {{ post.comments|length if post.comments }}
+              <i class="fa-solid fa-comment" style="color: #ff7043;"></i> {{ post.comments|length if post.comments }}
             </div>
           </div>
         </div>
