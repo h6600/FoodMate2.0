@@ -6,14 +6,23 @@
   <title>Foodmate - Discover Food Experiences</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+  <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans">
 
-  <nav class="flex justify-between items-center px-8 py-4 bg-white shadow-md fixed w-full z-10">
-    <h1 class="text-2xl font-bold text-red-500">🍽️ FoodMate</h1>
+ 
+    <nav class="flex justify-between items-center px-8 py-4 bg-orange shadow-md fixed w-full z-10" style="background-color: #f4511e;">
+
+    <h1 style="color: aliceblue;">
+  <i class="fas fa-utensils mr-2"></i> FoodMate
+</h1>
     <div class="space-x-4">
-      <a href="{{ url_for('login') }}" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Login</a>
-      <a href="{{ url_for('register') }}" class="px-4 py-2 border border-red-500 text-red-500 rounded hover:bg-red-50">Register</a>
+<a href="{{ url_for('login') }}" class="px-4 py-2 bg-white text-[#f97316] border border-[#f97316] rounded hover:bg-orange-50 font-medium">Login</a>
+<a href="{{ url_for('register') }}" class="px-4 py-2 bg-white text-[#f97316] border border-[#f97316] rounded hover:bg-orange-50 font-medium">Register</a>
+
     </div>
   </nav>
   <!-- Hero Banner -->
@@ -31,7 +40,7 @@
   <section class="bg-white py-16">
     <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center gap-10">
       <div class="w-full md:w-1/2" data-aos="fade-right">
-        <img src="{{ url_for('static', filename='/explore.jpg') }}" alt="Explore" class="w-full rounded-xl shadow-lg" />
+        <img src="{{ url_for('static', filename='/explore.png') }}" alt="Explore" class="w-full rounded-xl shadow-lg" />
       </div>
       <div class="w-full md:w-1/2 text-left" data-aos="fade-left">
         <h2 class="text-3xl font-bold mb-4">Explore Restaurants</h2>
@@ -46,7 +55,7 @@
   <section class="bg-gray-100 py-16">
     <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row-reverse items-center gap-10">
       <div class="w-full md:w-1/2" data-aos="fade-left">
-        <img src="{{ url_for('static', filename='/upload.jpg') }}" alt="Upload" class="w-full rounded-xl shadow-lg" />
+        <img src="{{ url_for('static', filename='/upload.png') }}" alt="Upload" class="w-full rounded-xl shadow-lg" />
       </div>
       <div class="w-full md:w-1/2 text-left" data-aos="fade-right">
         <h2 class="text-3xl font-bold mb-4">Upload Reviews</h2>
