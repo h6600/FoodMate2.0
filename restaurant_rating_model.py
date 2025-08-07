@@ -13,12 +13,23 @@ posts = db["posts"]
 
 def extract_features():
     restaurant_stats = {}
+    # Get all restaurant names from Users collection (role: owner)
+    owner_restaurants = set()
+    try:
+        users_coll = db["Users"]
+        for user in users_coll.find({"role": "owner"}):
+            loc = user.get("location", {})
+            name = loc.get("name")
+            if name:
+                owner_restaurants.add(name)
+    except Exception as e:
+        print("Error fetching owners:", e)
 
+    # Collect stats from posts
     for post in posts.find():
         restaurant = post.get('restaurant', {}).get('name')
         if not restaurant:
             continue
-
         if restaurant not in restaurant_stats:
             restaurant_stats[restaurant] = {
                 "total_posts": 0,
@@ -27,16 +38,25 @@ def extract_features():
                 "review_sentiments": {"Positive": 0, "Neutral": 0, "Negative": 0},
                 "comment_sentiments": {"Positive": 0, "Neutral": 0, "Negative": 0},
             }
-
         stats = restaurant_stats[restaurant]
         stats["total_posts"] += 1
         stats["total_likes"] += len(post.get("likes", []))
         stats["review_sentiments"][post.get("review_sentiment", "Neutral")] += 1
-
         comments = post.get("comments", [])
         stats["total_comments"] += len(comments)
         for comment in comments:
             stats["comment_sentiments"][comment.get("sentiment", "Neutral")] += 1
+
+    # Add restaurants with no posts
+    for restaurant in owner_restaurants:
+        if restaurant not in restaurant_stats:
+            restaurant_stats[restaurant] = {
+                "total_posts": 0,
+                "total_likes": 0,
+                "total_comments": 0,
+                "review_sentiments": {"Positive": 0, "Neutral": 0, "Negative": 0},
+                "comment_sentiments": {"Positive": 0, "Neutral": 0, "Negative": 0},
+            }
 
     # Convert to DataFrame
     data = []

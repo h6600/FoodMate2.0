@@ -15,6 +15,8 @@ from sentiment_model import predict_sentiment
 import bcrypt
 import pickle
 import pandas as pd
+import threading
+import subprocess
 
 MODEL_PATH = "restaurant_model.pkl"
 model = None
@@ -107,6 +109,8 @@ def register():
         }
 
         users.insert_one(user_data)
+        if(role == 'owner'):
+            rebuild_restaurant_rating_model()
         flash('Registered successfully. Please log in.')
         return redirect('/login')
 
@@ -172,6 +176,7 @@ def upload():
 
         posts.insert_one(post_data)
         flash('Post uploaded successfully!')
+        rebuild_restaurant_rating_model()
         return redirect(url_for('feed'))
 
     return render_template('upload.html')
@@ -199,7 +204,7 @@ def like_post(post_id):
         posts.update_one({'_id': ObjectId(post_id)}, {'$pull': {'dislikes': username}})
         # Add to likes
         posts.update_one({'_id': ObjectId(post_id)}, {'$addToSet': {'likes': username}})
-
+    rebuild_restaurant_rating_model()
     return redirect(f"/post/{post_id}")
 
 @app.route('/dislike_post/<post_id>', methods=['POST'])
@@ -215,7 +220,7 @@ def dislike_post(post_id):
         posts.update_one({'_id': ObjectId(post_id)}, {'$pull': {'likes': username}})
         # Add to dislikes
         posts.update_one({'_id': ObjectId(post_id)}, {'$addToSet': {'dislikes': username}})
-
+    rebuild_restaurant_rating_model()
     return redirect(f"/post/{post_id}")
 
 @app.route('/comment_post/<post_id>', methods=['POST'])
@@ -240,7 +245,7 @@ def comment_post(post_id):
         {'_id': ObjectId(post_id)},
         {'$push': {'comments': comment}}
     )
-
+    rebuild_restaurant_rating_model()
     return redirect(url_for('view_post', post_id=post_id))
 
 @app.route('/profile')
@@ -631,6 +636,12 @@ def predict_tag():
 @app.route('/foodMate')
 def home():
     return render_template('home.html')
+
+
+def rebuild_restaurant_rating_model():
+    def run_script():
+        subprocess.run(["python", "restaurant_rating_model.py"])
+    threading.Thread(target=run_script, daemon=True).start()
 
 if __name__ == '__main__':
     app.run(debug=True)
